@@ -116,7 +116,7 @@ a{color:var(--red)}
 </div>
 <div id="toast" class="toast"></div>
 <script>
-var API_URL = 'https://script.google.com/macros/s/AKfycbwx6q0D0QPiuaan0a3HZoL2N3uCUb_j5-yOVudxthYDkjlMorCRtdN2xcURKdS7YVU1/exec', WEB_VERSION = '1.5';
+var API_URL = 'https://script.google.com/macros/s/AKfycbwx6q0D0QPiuaan0a3HZoL2N3uCUb_j5-yOVudxthYDkjlMorCRtdN2xcURKdS7YVU1/exec', WEB_VERSION = '1.6';
 var TOKEN = (function () {
   var m = (location.hash + '&' + location.search).match(/[#?&]k=([A-Za-z0-9]{20,80})/), t = m ? m[1] : '';
   try { if (t) localStorage.setItem('a12k', t); else t = localStorage.getItem('a12k') || ''; } catch (e) {}
@@ -339,9 +339,54 @@ function viewDue() {
 }
 
 function itemsLines(items) { return items.map(i => '- ' + i.ten + ': ' + (i.days < 0 ? 'quá hạn từ ' + dmy(i.due) : 'hạn ' + dmy(i.due))).join('\n'); }
+/* ---- Tin cho khách: cá nhân hóa xưng hô, tên gọi, người gửi (giao diện 1.6) ---- */
+const HO_VN = new Set('nguyễn trần lê phạm hoàng huỳnh phan vũ võ đặng bùi đỗ hồ ngô dương lý trương đinh mai cao lương lâm đoàn tạ trịnh đào kiều hà tô chu uông liêu thái phùng quách lưu tăng vương la triệu khúc thân lại doãn'.split(' '));
+const NOI_VN = ['hải phòng', 'hưng yên', 'trà vinh', 'nam định', 'quảng ninh', 'nghệ an', 'quảng trị', 'hà nội', 'thanh oai', 'hoàng mai', 'hà đông', 'thanh hà', 'xuân mai', 'thanh trì', 'mỹ đình', 'đan phượng', 'chương mỹ', 'hòa bình', 'thường tín'];
+const XH_TRUOC = { 'anh': 'anh', 'a': 'anh', 'a.': 'anh', 'chị': 'chị', 'c.': 'chị', 'chú': 'chú', 'bác': 'bác', 'cô': 'cô', 'ông': 'ông', 'bà': 'bà' };
+const lo = s => String(s || '').toLocaleLowerCase('vi');
+const khongDau = s => lo(s).normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd');
+const HO_KD = new Set([...HO_VN].map(khongDau));
+const laHo = w => HO_VN.has(lo(w)) || (khongDau(w) === lo(w) && HO_KD.has(lo(w)));
+const DEM_NAM = ['văn', 'đình', 'đức', 'mạnh', 'trọng', 'hữu', 'bá', 'công', 'quang'];
+const hoa1 = s => s ? s.charAt(0).toLocaleUpperCase('vi') + s.slice(1) : '';
+const viHoa = w => w ? hoa1(lo(w)) : '';
+/** "Chị Nguyễn Thị Thúy - Mỗ Lao" → {xh:'chị', goi:'Thúy', toi:'em'}. Không rõ giới → xh 'anh/chị'.
+ *  Muốn chắc chắn: sửa tên khách có chữ "Anh"/"Chị"/"Chú"/"Cô"/"Bác" ở đầu. */
+function xungHo(tenRaw) {
+  let s = String(tenRaw || '').replace(/\(.*?\)/g, ' ').split(/\s*[-–]\s*/)[0].replace(/\b(mr|mrs|ms)\.?\s+/ig, '').replace(/^(đl|đại lý)\s+/i, '').replace(/\s+/g, ' ').trim();
+  if (/^khách( lẻ)?$/i.test(s)) s = '';
+  let w = s ? s.split(' ') : [], lw = w.map(lo);
+  for (const n of NOI_VN) { const k = n.split(' ').length; if (lw.length > k + 1 && lw.slice(-k).join(' ') === n) { w = w.slice(0, -k); lw = lw.slice(0, -k); break; } }
+  let xh = XH_TRUOC[lw[0]] || '';
+  const rest = xh ? w.slice(1) : w, lr = rest.map(lo);
+  if (lr.includes('thị')) xh = (!xh || xh === 'chị' || xh === 'cô' || xh === 'bà') ? (xh || 'chị') : '';
+  else if (!xh && (lr.includes('văn') || (rest.length >= 3 && laHo(rest[0]) && DEM_NAM.includes(lr[1])))) xh = 'anh';
+  let goi = '';
+  if (rest.length) goi = viHoa(rest.length >= 2 && laHo(rest[rest.length - 1]) && !laHo(rest[0]) ? rest[0] : rest[rest.length - 1]);
+  return { xh: xh || 'anh/chị', goi, toi: ['chú', 'bác', 'cô', 'ông', 'bà'].includes(xh) ? 'cháu' : 'em' };
+}
+function itemsKhach(items) {
+  const out = [];
+  items.forEach(i => {
+    if (/^BH_/.test(i.ma || '')) { if (i.days >= 0) out.push('- Bảo hành ' + String(i.ten).replace(/^hết bảo hành\s*/i, '') + ': còn đến ' + dmy(i.due) + ', nên kiểm tra tổng thể trước khi hết hạn'); return; }
+    const viec = i.ma === 'MUOI' ? 'bổ sung' : (i.ma === 'SUC_RUA' ? 'sục rửa' : 'thay');
+    out.push('- ' + i.ten + (i.days < 0 ? ': đã đến kỳ ' + viec : ': sắp đến kỳ ' + viec + ' (khoảng ' + dmy(i.due) + ')'));
+  });
+  return out.length ? out.join('\n') : '- Kiểm tra tổng thể hệ lọc định kỳ';
+}
+function tenNguoiGui() {
+  const w = String((S.init.user || {}).ten || '').replace(/\(.*?\)/g, ' ').replace(/\b(cskh|test|a12)\b/ig, ' ').trim().split(/\s+/).filter(Boolean);
+  return w.length ? w[w.length - 1] : 'bộ phận CSKH';
+}
+function khoTen(dl) { return dl ? String(dl.ten).replace(/^tổng\s+kho\s+/i, 'kho ') : ''; }
+function gonTin(t) { return String(t).replace(/^[ \t]*\u0001[ \t]*(\n|$)/gm, '').replace(/\u0001/g, '').replace(/[ \t]{2,}/g, ' ').replace(/ ([,.!?])/g, '$1').replace(/[ \t]+\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim(); }
 function textKhach(kh, items) {
-  const dl = dealerOf(kh.maDL);
-  return fillT(S.init.mauTin.KHACH, { ten_khach: kh.ten, hang_muc: itemsLines(items), ngay_den_han: dmy(items[0].due), dai_ly: dl ? dl.ten : 'A12', sdt_dai_ly: dl && dl.sdt ? phoneFmt(dl.sdt) : '' });
+  const dl = dealerOf(kh.maDL), x = xungHo(kh.ten), kt = khoTen(dl), sdt = dl && dl.sdt ? phoneFmt(dl.sdt) : '';
+  return gonTin(fillT(S.init.mauTin.KHACH, {
+    xung_ho: x.xh, Xung_ho: hoa1(x.xh), ten_goi: x.goi, toi: x.toi, Toi: hoa1(x.toi), nguoi_gui: tenNguoiGui(),
+    kho: kt ? ' (' + kt + ')' : '', lien_he: sdt ? 'Cần gấp, ' + x.xh + ' gọi ' + kt + ': ' + sdt + ' ạ.' : '\u0001',
+    ten_khach: kh.ten, hang_muc: itemsKhach(items), ngay_den_han: dmy(items[0].due), dai_ly: dl ? 'A12 (' + kt + ')' : 'A12', sdt_dai_ly: sdt
+  }));
 }
 function fillT(tpl, m) { return String(tpl || '').replace(/\{(\w+)\}/g, (a, k) => m[k] != null ? m[k] : a); }
 
@@ -364,7 +409,9 @@ function msgKhach(gi, ci) {
 function sendDealer(gi) {
   const g = S.due.groups[gi];
   const list = g.customers.map((e, i) => (i + 1) + '. ' + e.kh.ten + (e.kh.sdt ? ' – ' + phoneFmt(e.kh.sdt) : '') + (e.kh.diaChi ? ' – ' + e.kh.diaChi : '') + '\n   ' + e.items.map(it => it.ten + ' (' + (it.days < 0 ? 'quá hạn ' + (-it.days) + ' ngày' : 'hạn ' + dm(it.due)) + ')').join('; ')).join('\n');
-  const sample = fillT(S.init.mauTin.KHACH, { ten_khach: '[tên khách]', hang_muc: '- [hạng mục]: hạn [ngày]', ngay_den_han: '[ngày]', dai_ly: g.dealer.ma ? g.dealer.ten : 'A12', sdt_dai_ly: g.dealer.sdt ? phoneFmt(g.dealer.sdt) : '' });
+  const kt = g.dealer.ma ? khoTen(g.dealer) : '';
+  const sample = gonTin(fillT(S.init.mauTin.KHACH, { xung_ho: '[anh/chị]', Xung_ho: '[Anh/Chị]', ten_goi: '[tên]', toi: 'em', Toi: 'Em', nguoi_gui: '[tên người gửi]', kho: kt ? ' (' + kt + ')' : '', lien_he: '',
+    ten_khach: '[tên khách]', hang_muc: '- [hạng mục]: đã đến kỳ thay', ngay_den_han: '[ngày]', dai_ly: kt ? 'A12 (' + kt + ')' : 'A12', sdt_dai_ly: g.dealer.sdt ? phoneFmt(g.dealer.sdt) : '' }));
   const text = fillT(S.init.mauTin.DAI_LY, { dai_ly: g.dealer.ten, so_khach: g.customers.length, danh_sach: list, tin_mau: sample });
   const ids = []; g.customers.forEach(e => e.items.forEach(i => ids.push(i.id)));
   msgSheet('Gửi ' + g.dealer.ten, text, g.dealer.sdt, ids, 'đại lý');
