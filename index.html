@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src https://script.google.com https://script.googleusercontent.com; manifest-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'">
+<meta name="theme-color" content="#ffffff">
+<meta name="description" content="A12 Nhắc lịch — nhắc bảo trì lọc nước cho khách của đại lý và sổ hạn A12.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="A12 Nhắc lịch">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>A12 Nhắc lịch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--red:#D10000;--ink:#111;--muted:#666;--line:#E6E6E6;--card:#F5F5F5;--accent:#FBF0F0;--amber:#9A5B00;--amberbg:#FFF3DC;--green:#1E7B34;--greenbg:#E8F5EB;--greybg:#EEE;--radius:12px}
+*{box-sizing:border-box}
+html,body{margin:0;background:#fff;color:var(--ink);font-family:'Be Vietnam Pro',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;font-size:15px;line-height:1.45;-webkit-text-size-adjust:100%}
+button,input,select,textarea{font:inherit;color:inherit}
+.top{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:10px 16px}
+.brand{font-weight:700;font-size:17px;display:flex;align-items:center;gap:8px}
+.logo{color:var(--red);font-weight:700;letter-spacing:.5px}
+.who{font-size:12.5px;color:var(--muted);text-align:right}
+main{max-width:760px;margin:0 auto;padding:14px 16px 96px}
+.nav{position:fixed;bottom:0;left:0;right:0;z-index:5;background:#fff;border-top:1px solid var(--line);display:flex;justify-content:center;padding-bottom:env(safe-area-inset-bottom)}
+.nav button{flex:1;max-width:150px;background:none;border:0;padding:8px 2px 9px;font-size:12px;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer}
+.nav button svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.nav button.on{color:var(--red);font-weight:600}
+h2{font-size:19px;margin:4px 0 12px}
+h3{font-size:16px;margin:0}
+.muted{color:var(--muted);font-size:13px}
+.small{font-size:13px}
+.row{display:flex;gap:8px;align-items:center}
+.between{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.wrap{flex-wrap:wrap}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.stat{background:var(--card);border-radius:var(--radius);padding:10px 12px}
+.stat b{display:block;font-size:22px;line-height:1.2}
+.stat span{font-size:12.5px;color:var(--muted)}
+.stat.hot{background:var(--accent)} .stat.hot b{color:var(--red)}
+.card{background:var(--card);border-radius:var(--radius);padding:12px 14px;margin-bottom:12px}
+.card.accent{background:var(--accent)} .card.accent h3{color:var(--red)}
+.group-h{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:18px 0 8px}
+.kh{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-top:8px}
+.kh-name{font-weight:600}
+.items{list-style:none;margin:8px 0 0;padding:0}
+.items li{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:5px 0;border-top:1px dashed var(--line);font-size:14px}
+.items li:first-child{border-top:0}
+.badge{display:inline-block;font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;white-space:nowrap}
+.b-red{background:var(--accent);color:var(--red)} .b-amber{background:var(--amberbg);color:var(--amber)} .b-green{background:var(--greenbg);color:var(--green)} .b-grey{background:var(--greybg);color:var(--muted)}
+.tag{font-size:11.5px;color:var(--green);white-space:nowrap}
+.actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.btn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:9px 14px;font-weight:600;font-size:14px;cursor:pointer;text-decoration:none;color:var(--ink);display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:40px}
+.btn.primary{background:var(--red);border-color:var(--red);color:#fff}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--red);padding-left:6px;padding-right:6px}
+.btn.sm{padding:6px 10px;min-height:34px;font-size:13px}
+.btn.block{width:100%}
+.btn:disabled{opacity:.5}
+.field{margin-bottom:12px}
+.field label{display:block;font-size:13px;color:var(--muted);margin-bottom:4px}
+input[type=text],input[type=tel],input[type=date],input[type=number],input[type=email],input[type=search],select,textarea{width:100%;border:1px solid #CFCFCF;border-radius:10px;padding:10px 12px;background:#fff;font-size:15px}
+textarea{min-height:150px;resize:vertical}
+input:focus,select:focus,textarea:focus{outline:2px solid rgba(209,0,0,.25);border-color:var(--red)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 8px}
+.chip{border:1px solid #CFCFCF;border-radius:999px;padding:7px 12px;font-size:13.5px;background:#fff;cursor:pointer}
+.chip.on{border-color:var(--red);background:var(--accent);color:var(--red);font-weight:600}
+.check{display:flex;gap:10px;align-items:flex-start;padding:7px 0;border-top:1px solid var(--line);font-size:14px}
+.check:first-child{border-top:0}
+.check input{margin-top:3px;width:18px;height:18px;accent-color:var(--red)}
+.radio{display:flex;gap:10px;align-items:center;padding:9px 10px;border:1px solid var(--line);border-radius:10px;margin-bottom:6px;cursor:pointer}
+.radio input{width:18px;height:18px;accent-color:var(--red)}
+.list-item{display:block;width:100%;text-align:left;background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:8px;cursor:pointer}
+.empty{text-align:center;color:var(--muted);padding:28px 10px}
+.loading{text-align:center;color:var(--muted);padding:40px 0}
+.note{font-size:13px;color:var(--muted);margin:6px 0 0}
+.sec{margin:22px 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);font-weight:600}
+table.t{width:100%;border-collapse:collapse;font-size:13.5px}
+table.t th,table.t td{text-align:left;padding:7px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+table.t th{color:var(--muted);font-weight:600;font-size:12.5px}
+.scroll{overflow-x:auto}
+.sheet{position:fixed;inset:0;z-index:20;display:flex;align-items:flex-end;justify-content:center}
+.sheet.hidden{display:none}
+.sheet-bg{position:absolute;inset:0;background:rgba(0,0,0,.35)}
+.sheet-card{position:relative;background:#fff;width:100%;max-width:640px;max-height:92vh;overflow-y:auto;border-radius:16px 16px 0 0;padding:14px 16px calc(18px + env(safe-area-inset-bottom))}
+.sheet-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;position:sticky;top:-14px;background:#fff;padding-top:4px}
+.sheet-head h3{font-size:17px}
+.x{border:0;background:var(--card);width:34px;height:34px;border-radius:50%;font-size:20px;line-height:1;cursor:pointer}
+@media(min-width:700px){.sheet{align-items:center}.sheet-card{border-radius:16px}}
+.toast{position:fixed;left:50%;bottom:84px;transform:translateX(-50%);background:#111;color:#fff;padding:10px 16px;border-radius:10px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:30;max-width:90vw;text-align:center}
+.toast.show{opacity:1} .toast.bad{background:var(--red)}
+.back{margin-bottom:8px}
+.topr{display:flex;align-items:center;gap:10px}
+.rf{border:1px solid var(--line);background:#fff;width:36px;height:36px;border-radius:50%;font-size:18px;line-height:1;cursor:pointer;color:var(--ink)}
+.rf.spin{animation:spin 1s linear infinite;color:var(--red)}
+@keyframes spin{to{transform:rotate(360deg)}}
+.verdict{border-radius:var(--radius);padding:12px 14px;margin:10px 0;font-weight:600}
+.v-pass{background:var(--greenbg);color:var(--green)} .v-fail{background:var(--accent);color:var(--red)} .v-wait{background:var(--card);color:var(--ink)}
+a{color:var(--red)}
+</style>
+</head>
+<body>
+<header class="top"><div class="brand"><span class="logo">A12</span><span>Nhắc lịch</span></div><div class="topr"><div id="who" class="who"></div><button id="btnRefresh" class="rf" onclick="lamMoi()" aria-label="Làm mới dữ liệu" title="Làm mới dữ liệu">↻</button></div></header>
+<main id="main"><div class="loading">Đang tải…</div></main>
+<nav id="nav" class="nav"></nav>
+<div id="sheet" class="sheet hidden" role="dialog" aria-modal="true">
+  <div class="sheet-bg" onclick="closeSheet()"></div>
+  <div class="sheet-card"><div class="sheet-head"><h3 id="sheetTitle"></h3><button class="x" onclick="closeSheet()" aria-label="Đóng">×</button></div><div id="sheetBody"></div></div>
+</div>
+<div id="toast" class="toast"></div>
+<script>
+var API_URL = 'https://script.google.com/macros/s/AKfycbwx6q0D0QPiuaan0a3HZoL2N3uCUb_j5-yOVudxthYDkjlMorCRtdN2xcURKdS7YVU1/exec', WEB_VERSION = '1.3';
+var TOKEN = (function () {
+  var m = (location.hash + '&' + location.search).match(/[#?&]k=([A-Za-z0-9]{20,80})/), t = m ? m[1] : '';
+  try { if (t) localStorage.setItem('a12k', t); else t = localStorage.getItem('a12k') || ''; } catch (e) {}
+  if (t && (location.search || location.hash !== '#k=' + t)) history.replaceState(null, '', location.pathname + '#k=' + t);
+  return t;
+})();
+</script>
+<script>
+const S = { token: TOKEN, init: null, tab: null, due: null, dueOpts: { dealer: 'ALL', hideNotified: false }, kh: null, khList: [], soHan: [], users: [], q: '', pending: 0 };
+const $ = s => document.querySelector(s);
+const main = () => $('#main');
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const dmy = iso => iso ? iso.slice(8, 10) + '/' + iso.slice(5, 7) + '/' + iso.slice(0, 4) : '';
+const dm = iso => iso ? iso.slice(8, 10) + '/' + iso.slice(5, 7) : '';
+const phoneFmt = p => { p = String(p || ''); return p.length === 10 ? p.slice(0, 4) + ' ' + p.slice(4, 7) + ' ' + p.slice(7) : p; };
+const errMsg = e => (e && e.message) ? e.message.replace(/^Exception:\s*/, '') : String(e);
+const lcFirst = s => s ? s.charAt(0).toLowerCase() + s.slice(1) : s;
+
+async function call(fn, ...args) {
+  let r;
+  try { r = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ fn, k: S.token, args }), credentials: 'omit', cache: 'no-store', redirect: 'follow' }); }
+  catch (e) { throw new Error('Chưa kết nối được máy chủ — kiểm tra mạng rồi bấm ↻ để thử lại.'); }
+  let j; try { j = await r.json(); } catch (e) { throw new Error('Máy chủ trả về dữ liệu lạ (mã ' + r.status + '). Thử lại sau ít phút.'); }
+  if (!j.ok) { const err = new Error(j.error || 'Lỗi không rõ'); if (/Link không còn hiệu lực|Thiếu mã truy cập/.test(err.message)) setTimeout(() => thoat(err.message), 0); throw err; }
+  return j.value;
+}
+/* Lưu bản dữ liệu gần nhất trên máy: lần sau mở app hiện ngay, rồi lặng lẽ cập nhật. */
+const CACHE_KEY = () => 'a12c:' + S.token;
+function saveCache(d) { try { localStorage.setItem(CACHE_KEY(), JSON.stringify(d)); } catch (e) {} }
+function loadCache() { try { return JSON.parse(localStorage.getItem(CACHE_KEY()) || 'null'); } catch (e) { return null; } }
+function thoat(msg) {
+  try { Object.keys(localStorage).filter(k => k === 'a12k' || k.indexOf('a12c:') === 0).forEach(k => localStorage.removeItem(k)); } catch (e) {}
+  S.token = ''; S.init = null; history.replaceState(null, '', location.pathname); closeSheet(); askLink(msg);
+}
+function askLink(msg) {
+  $('#nav').innerHTML = ''; $('#who').innerHTML = ''; $('#btnRefresh').style.display = 'none';
+  main().innerHTML = `<div class="card accent" style="margin-top:20px"><h3>Mở A12 Nhắc lịch</h3>
+    <p>${esc(msg || 'Dán link cá nhân quản trị đã gửi riêng cho anh/chị (qua Zalo) vào ô dưới rồi bấm Mở.')}</p>
+    <input type="text" id="lk" placeholder="https://app.congnghea12.com/#k=…" autocomplete="off" autocapitalize="off" spellcheck="false">
+    <div class="actions"><button class="btn primary" onclick="useLink()">Mở app</button></div></div>`;
+}
+function useLink() {
+  const m = String($('#lk').value || '').match(/k=([A-Za-z0-9]{20,80})/);
+  if (!m) return toast('Link chưa đúng — cần có đoạn k=… ở cuối', true);
+  S.token = m[1]; try { localStorage.setItem('a12k', S.token); } catch (e) {}
+  history.replaceState(null, '', location.pathname + '#k=' + S.token); boot();
+}
+let installEvt = null;
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEvt = e; });
+function taiKhoan() {
+  if (!S.init) return;
+  const ios = /iphone|ipad|ipod/i.test(navigator.userAgent), standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+  const cai = standalone ? '<p class="small">App đã được cài trên máy này.</p>'
+    : installEvt ? '<div class="actions"><button class="btn primary" onclick="caiApp()">Cài app vào máy</button></div>'
+    : '<p class="small">' + (ios ? 'Cài app: trong Safari bấm nút Chia sẻ → <b>Thêm vào MH chính</b>.' : 'Cài app: mở menu ⋮ của Chrome → <b>Cài đặt ứng dụng</b> / <b>Thêm vào màn hình chính</b>.') + '</p>';
+  openSheet('Tài khoản', `<p style="margin-top:0"><b>${esc(S.init.user.ten)}</b><br><span class="muted">${esc(S.init.user.role)}${S.init.user.email ? ' · ' + esc(S.init.user.email) : ''}</span></p>
+    ${cai}<div class="sec">Máy này</div>
+    <p class="small">Dữ liệu được lưu tạm trên máy để mở nhanh. Dùng máy chung hoặc bàn giao máy thì bấm Thoát.</p>
+    <div class="actions"><button class="btn" onclick="thoat('Đã thoát khỏi máy này.')">Thoát khỏi máy này</button></div>
+    <p class="muted" style="margin-top:14px">Giao diện ${WEB_VERSION} · máy chủ ${esc(S.init.version || '')}</p>`);
+}
+async function caiApp() { if (!installEvt) return; installEvt.prompt(); try { await installEvt.userChoice; } catch (e) {} installEvt = null; closeSheet(); }
+window.addEventListener('hashchange', () => { const m = location.hash.match(/k=([A-Za-z0-9]{20,80})/); if (m && m[1] !== S.token) location.reload(); });
+if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
+let toastTimer;
+function toast(msg, bad) {
+  const t = $('#toast'); t.textContent = msg; t.className = 'toast show' + (bad ? ' bad' : '');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.className = 'toast', bad ? 4500 : 2200);
+}
+function openSheet(title, html) { $('#sheetTitle').textContent = title; $('#sheetBody').innerHTML = html; $('#sheet').classList.remove('hidden'); }
+function closeSheet() { $('#sheet').classList.add('hidden'); $('#sheetBody').innerHTML = ''; }
+function busy(btn, on) { if (!btn) return; btn.disabled = on; if (on) { btn.dataset.t = btn.textContent; btn.textContent = 'Đang lưu…'; } else if (btn.dataset.t) btn.textContent = btn.dataset.t; }
+const normText = s => String(s == null ? '' : s).normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D').toLowerCase().trim();
+
+/* ---------------- Dữ liệu: tải 1 lượt, ghi trả dữ liệu mới ---------------- */
+function setData(d) { S.init = d; saveCache(d); }
+// Ghi chờ kết quả (form có thể báo lỗi). Máy chủ ghi xong trả luôn dữ liệu mới → không cần tải lại.
+async function callW(fn, args, opts) {
+  const r = await call('api_ghi', fn, args, opts || {});
+  setData(r.data); if (r.chiTiet) S.kh = r.chiTiet;
+  return r;
+}
+// Ghi chạy nền: màn hình đổi ngay, người dùng làm tiếp; lỗi thì báo và tải lại dữ liệu thật.
+function bgWrite(fn, args, opts, okMsg) {
+  S.pending++; toast('Đang lưu…');
+  call('api_ghi', fn, args, opts || {}).then(r => {
+    S.pending--; setData(r.data);
+    if (r.chiTiet && S.kh && S.kh.kh.ma === r.chiTiet.kh.ma) S.kh = r.chiTiet;
+    if (!S.pending) { rerender(); toast(okMsg || 'Đã lưu'); }
+  }).catch(e => { S.pending--; toast('Chưa lưu được: ' + errMsg(e), true); lamMoi(true); });
+}
+function rerender() {
+  if (!$('#sheet').classList.contains('hidden')) return; // đang mở hộp nhập liệu — không vẽ lại
+  if (S.tab === 'due') viewDue();
+  else if (S.tab === 'khach') { if (S.kh) renderKhach(); else searchKhach(); }
+  else if (S.tab === 'sohan') viewSoHan();
+  else if (S.tab === 'caidat') viewCaiDat();
+}
+async function lamMoi(quiet) {
+  const b = $('#btnRefresh'); if (b) b.classList.add('spin');
+  try {
+    setData(await call('api_tongHop'));
+    if (S.tab === 'khach' && S.kh) S.kh = await call('api_chiTietKhach', S.kh.kh.ma);
+    if (S.tab === 'thidiem') viewThiDiem(); else rerender();
+    if (!quiet) toast('Đã cập nhật dữ liệu mới nhất');
+  } catch (e) { toast(errMsg(e), true); }
+  finally { if (b) b.classList.remove('spin'); }
+}
+// Lọc danh sách đến hạn tại máy (theo đại lý, ẩn mục đã báo) — không gọi máy chủ.
+function filterDue(due, o) {
+  const counts = { overdue: 0, soon: 0, notified: 0, snoozed: due.counts.snoozed, control: due.counts.control }, groups = [];
+  due.groups.forEach(g => {
+    if (o.dealer !== 'ALL' && (g.dealer.ma || '') !== o.dealer) return;
+    const cs = [];
+    g.customers.forEach(e => {
+      const items = e.items.filter(it => { if (it.notified) counts.notified++; if (o.hideNotified && it.notified) return false; counts[it.state]++; return true; });
+      if (items.length) cs.push(Object.assign({}, e, { items }));
+    });
+    if (cs.length) groups.push(Object.assign({}, g, { customers: cs }));
+  });
+  return { groups, counts };
+}
+// Cập nhật ngay trên màn hình trước khi máy chủ trả lời.
+function patchDue(ids, action) {
+  const due = S.init.due; if (!due) return;
+  const set = new Set(ids);
+  due.groups.forEach(g => g.customers.forEach(e => {
+    e.items = e.items.filter(it => {
+      if (!set.has(it.id)) return true;
+      if (action === 'DA_BAO') { it.notified = true; it.notifiedAt = S.init.today; return true; }
+      if (action === 'HEN_LAI') due.counts.snoozed++;
+      return false;
+    });
+  }));
+  due.groups.forEach(g => { g.customers = g.customers.filter(e => e.items.length); });
+  due.groups = due.groups.filter(g => g.customers.length);
+}
+
+function dayText(d) { if (d === null || d === undefined) return ''; if (d < 0) return 'Quá hạn ' + (-d) + ' ngày'; if (d === 0) return 'Hôm nay'; return 'Còn ' + d + ' ngày'; }
+function itemBadge(it) {
+  if (it.state === 'paused') return '<span class="badge b-grey">Tạm dừng</span>';
+  if (it.state === 'nodata') return '<span class="badge b-grey">Chưa có chu kỳ</span>';
+  const c = it.state === 'overdue' ? 'b-red' : it.state === 'soon' ? 'b-amber' : 'b-green';
+  return '<span class="badge ' + c + '">' + dayText(it.days) + '</span>';
+}
+function cycleText(c, u) { return c ? c + ' ' + u : '—'; }
+function dealerOf(ma) { return (S.init.dealers || []).find(d => d.ma === ma) || null; }
+
+async function copyText(t) {
+  try { await navigator.clipboard.writeText(t); return true; } catch (e) { }
+  const ta = document.createElement('textarea'); ta.value = t; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.top = '0'; ta.style.opacity = '0';
+  document.body.appendChild(ta); ta.focus(); ta.select(); ta.setSelectionRange(0, t.length);
+  let ok = false; try { ok = document.execCommand('copy'); } catch (e) { }
+  document.body.removeChild(ta); return ok;
+}
+async function copyMsg() {
+  const ok = await copyText($('#msgText').value);
+  toast(ok ? 'Đã chép tin. Dán vào Zalo.' : 'Trình duyệt chặn chép tự động — giữ tay vào ô tin để chép.', !ok);
+}
+
+/* ---------------- Khởi động ---------------- */
+const ICONS = {
+  due: '<svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>',
+  khach: '<svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="4"/><path d="M2 21v-1a7 7 0 0 1 14 0v1"/><path d="M17 4a4 4 0 0 1 0 8"/><path d="M22 21v-1a7 7 0 0 0-4-6.3"/></svg>',
+  sohan: '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="m9 16 2 2 4-4"/></svg>',
+  thidiem: '<svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg>',
+  caidat: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>'
+};
+const TABS = [['due', 'Đến hạn', 'canKhach'], ['khach', 'Khách', 'canKhach'], ['sohan', 'Sổ hạn', 'canSoHan'], ['thidiem', 'Thí điểm', 'canKhach'], ['caidat', 'Cài đặt', 'isAdmin']];
+
+async function boot() {
+  if (!S.token) return askLink();
+  $('#btnRefresh').style.display = '';
+  const c = loadCache();
+  if (c && c.user) { S.init = c; startUI(); return lamMoi(true); }
+  try { setData(await call('api_tongHop')); } catch (e) { return S.token ? fatal(errMsg(e)) : null; }
+  startUI();
+}
+function startUI() {
+  $('#who').innerHTML = esc(S.init.user.ten) + (S.init.user.ten !== S.init.user.role ? '<br>' + esc(S.init.user.role) : '');
+  const tabs = TABS.filter(t => S.init[t[2]]);
+  $('#nav').innerHTML = tabs.map(t => `<button data-tab="${t[0]}" onclick="go('${t[0]}')">${ICONS[t[0]]}<span>${t[1]}</span></button>`).join('');
+  go(tabs.length ? tabs[0][0] : 'none');
+  const w = $('#who'); w.style.cursor = 'pointer'; w.title = 'Tài khoản'; w.onclick = taiKhoan;
+}
+function fatal(msg) { main().innerHTML = '<div class="card accent" style="margin-top:20px"><h3>Không mở được app</h3><p>' + esc(msg) + '</p></div>'; }
+function go(tab) {
+  S.tab = tab; closeSheet(); window.scrollTo(0, 0);
+  document.querySelectorAll('#nav button').forEach(b => b.classList.toggle('on', b.dataset.tab === tab));
+  ({ due: viewDue, khach: viewKhach, sohan: viewSoHan, thidiem: viewThiDiem, caidat: viewCaiDat }[tab] || (() => fatal('Tài khoản chưa được giao chức năng nào.')))();
+}
+function loading() { main().innerHTML = '<div class="loading">Đang tải…</div>'; }
+
+/* ---------------- ĐẾN HẠN ---------------- */
+function viewDue() {
+  const r = filterDue(S.init.due, S.dueOpts);
+  S.due = r; const c = r.counts;
+  const dlOpts = ['<option value="ALL">Tất cả đại lý</option>'].concat(S.init.dealers.map(d => `<option value="${esc(d.ma)}">${esc(d.ten)}</option>`), ['<option value="">Chưa gán đại lý</option>']).join('');
+  let h = `<h2>Đến hạn bảo trì</h2>
+  <div class="stats"><div class="stat hot"><b>${c.overdue}</b><span>Quá hạn</span></div><div class="stat"><b>${c.soon}</b><span>Sắp đến hạn</span></div><div class="stat"><b>${c.notified}</b><span>Đã báo</span></div></div>
+  <div class="row wrap" style="margin-bottom:6px"><select id="fDealer" style="flex:1;min-width:180px" onchange="S.dueOpts.dealer=this.value;viewDue()">${dlOpts}</select>
+  <label class="row small" style="gap:6px"><input type="checkbox" id="fHide" ${S.dueOpts.hideNotified ? 'checked' : ''} onchange="S.dueOpts.hideNotified=this.checked;viewDue()" style="width:18px;height:18px;accent-color:var(--red)">Ẩn mục đã báo</label></div>`;
+  const notes = [];
+  if (c.snoozed) notes.push(c.snoozed + ' hạng mục đang hẹn lại');
+  if (c.control) notes.push(c.control + ' hạng mục của nhóm Đối chứng không hiện (để đo thí điểm)');
+  if (notes.length) h += `<p class="note">${notes.join(' · ')}.</p>`;
+  if (!r.groups.length) h += '<div class="empty">Không có khách nào cần nhắc lúc này.</div>';
+  r.groups.forEach((g, gi) => {
+    h += `<div class="group-h"><div><h3>${esc(g.dealer.ten)}</h3><div class="muted">${g.customers.length} khách${g.dealer.sdt ? ' · ' + phoneFmt(g.dealer.sdt) : ''}</div></div>
+      <button class="btn sm" onclick="sendDealer(${gi})">Gửi danh sách</button></div>`;
+    g.customers.forEach((e, ci) => {
+      h += `<div class="kh"><div class="between"><div><div class="kh-name">${esc(e.kh.ten)}</div><div class="muted">${e.kh.sdt ? `<a href="tel:${esc(e.kh.sdt)}">${phoneFmt(e.kh.sdt)}</a>` : 'Chưa có SĐT'}${e.kh.diaChi ? ' · ' + esc(e.kh.diaChi) : ''}</div></div>
+        <button class="btn ghost sm" onclick="openKhach('${esc(e.kh.ma)}')">Chi tiết</button></div><ul class="items">`;
+      e.items.forEach(it => { h += `<li><span>${esc(it.ten)}${it.notified ? ` <span class="tag">· đã báo ${dm(it.notifiedAt)}</span>` : ''}</span>${itemBadge(it)}</li>`; });
+      h += `</ul><div class="actions"><button class="btn sm" onclick="msgKhach(${gi},${ci})">Tin cho khách</button><button class="btn sm primary" onclick="ketQua(${gi},${ci})">Ghi kết quả</button></div></div>`;
+    });
+  });
+  main().innerHTML = h;
+  $('#fDealer').value = S.dueOpts.dealer;
+}
+
+function itemsLines(items) { return items.map(i => '- ' + i.ten + ': ' + (i.days < 0 ? 'quá hạn từ ' + dmy(i.due) : 'hạn ' + dmy(i.due))).join('\n'); }
+function textKhach(kh, items) {
+  const dl = dealerOf(kh.maDL);
+  return fillT(S.init.mauTin.KHACH, { ten_khach: kh.ten, hang_muc: itemsLines(items), ngay_den_han: dmy(items[0].due), dai_ly: dl ? dl.ten : 'A12', sdt_dai_ly: dl && dl.sdt ? phoneFmt(dl.sdt) : '' });
+}
+function fillT(tpl, m) { return String(tpl || '').replace(/\{(\w+)\}/g, (a, k) => m[k] != null ? m[k] : a); }
+
+function msgSheet(title, text, phone, ids, who) {
+  openSheet(title, `<div class="field"><textarea id="msgText">${esc(text)}</textarea></div>
+  <div class="actions"><button class="btn" onclick="copyMsg()">Chép tin</button>
+  ${phone ? `<a class="btn primary" href="https://zalo.me/${esc(phone)}" target="_blank" rel="noopener" onclick="copyMsg()">Chép &amp; mở Zalo ${esc(who)}</a>` : `<span class="muted">Chưa có SĐT/Zalo ${esc(who)}.</span>`}</div>
+  <div class="sec">Sau khi gửi</div><button class="btn block" id="btnMark" onclick="markNotified(this)">Đánh dấu đã báo (${ids.length} hạng mục)</button>`);
+  S.markIds = ids;
+}
+function markNotified() {
+  const ids = S.markIds; closeSheet();
+  patchDue(ids, 'DA_BAO'); rerender();
+  bgWrite('api_ghiKetQua', [{ ids, action: 'DA_BAO' }], S.tab === 'khach' && S.kh ? { chiTiet: S.kh.kh.ma } : {}, 'Đã đánh dấu đã báo');
+}
+function msgKhach(gi, ci) {
+  const e = S.due.groups[gi].customers[ci];
+  msgSheet('Tin cho ' + e.kh.ten, textKhach(e.kh, e.items), e.kh.sdt, e.items.map(i => i.id), 'khách');
+}
+function sendDealer(gi) {
+  const g = S.due.groups[gi];
+  const list = g.customers.map((e, i) => (i + 1) + '. ' + e.kh.ten + (e.kh.sdt ? ' – ' + phoneFmt(e.kh.sdt) : '') + (e.kh.diaChi ? ' – ' + e.kh.diaChi : '') + '\n   ' + e.items.map(it => it.ten + ' (' + (it.days < 0 ? 'quá hạn ' + (-it.days) + ' ngày' : 'hạn ' + dm(it.due)) + ')').join('; ')).join('\n');
+  const sample = fillT(S.init.mauTin.KHACH, { ten_khach: '[tên khách]', hang_muc: '- [hạng mục]: hạn [ngày]', ngay_den_han: '[ngày]', dai_ly: g.dealer.ma ? g.dealer.ten : 'A12', sdt_dai_ly: g.dealer.sdt ? phoneFmt(g.dealer.sdt) : '' });
+  const text = fillT(S.init.mauTin.DAI_LY, { dai_ly: g.dealer.ten, so_khach: g.customers.length, danh_sach: list, tin_mau: sample });
+  const ids = []; g.customers.forEach(e => e.items.forEach(i => ids.push(i.id)));
+  msgSheet('Gửi ' + g.dealer.ten, text, g.dealer.sdt, ids, 'đại lý');
+}
+
+function ketQua(gi, ci) { const e = S.due.groups[gi].customers[ci]; ketQuaSheet(e.kh, e.items, 'DA_THAY'); }
+function ketQuaSheet(kh, items, preset) {
+  S.kqItems = items;
+  const ck = items.map((it, i) => `<label class="check"><input type="checkbox" name="kqi" value="${esc(it.id)}" checked><span>${esc(it.ten)}<br><span class="muted">${it.due ? 'Hạn ' + dmy(it.due) : ''}</span></span></label>`).join('');
+  const opt = (v, t, extra) => `<label class="radio"><input type="radio" name="kqa" value="${v}" ${v === preset ? 'checked' : ''}><span style="flex:1">${t}</span>${extra || ''}</label>`;
+  openSheet('Ghi kết quả · ' + kh.ten, `<div class="card" style="padding:4px 12px">${ck}</div>
+    ${opt('DA_THAY', 'Đã thay / đã làm', '<input type="date" id="kqDate" style="width:auto" value="' + S.init.today + '" max="' + S.init.today + '">')}
+    ${opt('DA_BAO', 'Đã báo đại lý / đã nhắn khách')}
+    ${opt('HEN_LAI', 'Khách hẹn lại sau', '<select id="kqDays" style="width:auto"><option>3</option><option selected>7</option><option>14</option><option>30</option></select> ngày')}
+    ${opt('TAM_DUNG', 'Khách không thay — tạm dừng nhắc')}
+    <div class="field"><label>Ghi chú (không bắt buộc)</label><input type="text" id="kqNote" placeholder="VD: khách tự mua lõi ngoài"></div>
+    <button class="btn primary block" onclick="saveKetQua(this)">Lưu</button>`);
+}
+function saveKetQua() {
+  const ids = [...document.querySelectorAll('input[name=kqi]:checked')].map(x => x.value);
+  const a = (document.querySelector('input[name=kqa]:checked') || {}).value;
+  if (!ids.length) return toast('Chọn ít nhất một hạng mục', true);
+  if (!a) return toast('Chọn kết quả', true);
+  const date = $('#kqDate') ? $('#kqDate').value : '';
+  if (a === 'DA_THAY' && date > S.init.today) return toast('Ngày thay không được ở tương lai', true);
+  const p = { ids, action: a, date, days: $('#kqDays') ? $('#kqDays').value : 7, note: $('#kqNote').value };
+  closeSheet(); patchDue(ids, a); rerender();
+  bgWrite('api_ghiKetQua', [p], S.tab === 'khach' && S.kh ? { chiTiet: S.kh.kh.ma } : {});
+}
+
+/* ---------------- KHÁCH HÀNG ---------------- */
+let qTimer;
+function viewKhach() {
+  S.kh = null;
+  main().innerHTML = `<div class="between"><h2>Khách hàng</h2><button class="btn primary sm" onclick="formKhach()">+ Thêm khách</button></div>
+    <input type="search" id="q" placeholder="Tìm tên, SĐT, mã KH, địa chỉ" value="${esc(S.q)}" oninput="clearTimeout(qTimer);qTimer=setTimeout(()=>{S.q=this.value;searchKhach()},120)">
+    <div id="khList" style="margin-top:12px"></div>`;
+  searchKhach();
+}
+function searchKhach() {
+  const nq = normText(S.q), dq = String(S.q || '').replace(/\D/g, '');
+  const all = (S.init.khach || []).filter(k => !nq || (dq.length >= 3 && k.sdt.indexOf(dq) >= 0) || normText(k.ten + ' ' + k.ma + ' ' + k.diaChi + ' ' + k.khuVuc).indexOf(nq) >= 0);
+  const r = { total: all.length, list: all.slice(0, 60) };
+  S.khList = r.list;
+  const box = $('#khList'); if (!box) return;
+  if (!r.list.length) { box.innerHTML = '<div class="empty">' + (S.q ? 'Không tìm thấy khách phù hợp.' : 'Chưa có khách. Bấm “+ Thêm khách” hoặc nhập hàng loạt ở Cài đặt.') + '</div>'; return; }
+  box.innerHTML = `<p class="muted">${r.total} khách${r.total > r.list.length ? ' · hiện ' + r.list.length + ' khách gần hạn nhất' : ''}</p>` + r.list.map(k => `<button class="list-item" onclick="openKhach('${esc(k.ma)}')"><div class="between"><div><b>${esc(k.ten)}</b>${k.nhom === 'Đối chứng' ? ' <span class="badge b-grey">Đối chứng</span>' : ''}<div class="muted">${esc(k.ma)} · ${phoneFmt(k.sdt) || 'Chưa có SĐT'}${k.tenDL ? ' · ' + esc(k.tenDL) : ''}</div></div>
+    <div style="text-align:right">${k.next ? itemBadge({ state: k.next.days < 0 ? 'overdue' : k.next.days <= 7 ? 'soon' : 'later', days: k.next.days }) + '<div class="muted" style="margin-top:3px">' + esc(k.next.ten) + '</div>' : '<span class="muted">—</span>'}</div></div></button>`).join('');
+}
+
+async function openKhach(ma) {
+  if (S.tab !== 'khach') { S.tab = 'khach'; document.querySelectorAll('#nav button').forEach(b => b.classList.toggle('on', b.dataset.tab === 'khach')); }
+  closeSheet(); loading();
+  let r; try { r = await call('api_chiTietKhach', ma); } catch (e) { return fatal(errMsg(e)); }
+  S.kh = r; renderKhach(); window.scrollTo(0, 0);
+}
+function showKhach() { // hiện khách đang có trong S.kh (sau khi lưu), không gọi lại máy chủ
+  if (S.tab !== 'khach') { S.tab = 'khach'; document.querySelectorAll('#nav button').forEach(b => b.classList.toggle('on', b.dataset.tab === 'khach')); }
+  closeSheet(); renderKhach(); window.scrollTo(0, 0);
+}
+function renderKhach() {
+  const r = S.kh, k = r.kh, dl = dealerOf(k.maDL);
+  let h = `<button class="btn ghost back" onclick="viewKhach()">‹ Danh sách khách</button>
+    <div class="card"><div class="between"><div><h3>${esc(k.ten)}</h3><div class="muted">${esc(k.ma)} · nhóm ${esc(k.nhom)}</div></div><button class="btn sm" onclick="formKhach(S.kh.kh)">Sửa</button></div>
+    <div class="small" style="margin-top:8px">${k.sdt ? `<a href="tel:${esc(k.sdt)}">${phoneFmt(k.sdt)}</a> · <a href="https://zalo.me/${esc(k.sdt)}" target="_blank" rel="noopener">Zalo</a>` : 'Chưa có SĐT'}<br>${esc(k.diaChi || '')}${k.khuVuc ? ' · ' + esc(k.khuVuc) : ''}<br>Đại lý: ${dl ? esc(dl.ten) : 'chưa gán'}${k.ghiChu ? '<br>Ghi chú: ' + esc(k.ghiChu) : ''}</div></div>
+    <div class="between" style="margin-top:16px"><h3>Lịch bảo trì</h3><button class="btn sm" onclick="themHangMuc()">+ Thêm hạng mục</button></div>`;
+  if (!r.items.length) h += '<div class="empty">Chưa có hạng mục nhắc nào.</div>';
+  r.items.forEach((it, i) => {
+    h += `<div class="kh"><div class="between"><div><b>${esc(it.ten)}</b><div class="muted">Chu kỳ ${cycleText(it.cycle, it.unit)} · làm gần nhất ${dmy(it.lastDone) || '—'}${it.due ? ' · hạn ' + dmy(it.due) : ''}</div>
+      ${it.snoozed ? `<div class="muted">Hẹn lại tới ${dmy(it.snooze)}</div>` : ''}${it.notified ? `<div class="tag">Đã báo ${dmy(it.notifiedAt)}</div>` : ''}</div>${itemBadge(it)}</div>
+      <div class="actions"><button class="btn sm primary" onclick="ketQuaSheet(S.kh.kh,[S.kh.items[${i}]],'DA_THAY')">Ghi kết quả</button><button class="btn sm" onclick="suaHangMuc(${i})">Sửa lịch</button>
+      ${it.state === 'paused' ? `<button class="btn sm" onclick="tiepTuc(${i})">Tiếp tục nhắc</button>` : ''}</div></div>`;
+  });
+  if (r.items.some(i => i.state === 'overdue' || i.state === 'soon')) h += '<div class="actions"><button class="btn" onclick="msgKhachDetail()">Soạn tin nhắc khách</button></div>';
+  h += '<div class="sec">Lịch sử</div>';
+  h += r.logs.length ? '<div class="scroll"><table class="t"><tr><th>Lúc</th><th>Việc</th><th>Người</th></tr>' + r.logs.map(l => {
+    const it = r.items.find(x => x.id === l.id);
+    return `<tr><td>${esc(l.at)}</td><td>${esc(l.action)}${it ? ' · ' + esc(it.ten) : ''}${l.date && l.action === 'Đã thay' ? ' (' + dmy(l.date) + ')' : ''}${l.note ? '<div class="muted">' + esc(l.note) + '</div>' : ''}</td><td>${esc(l.by)}</td></tr>`;
+  }).join('') + '</table></div>' : '<p class="muted">Chưa có.</p>';
+  main().innerHTML = h;
+}
+function msgKhachDetail() {
+  const due = S.kh.items.filter(i => i.state === 'overdue' || i.state === 'soon');
+  msgSheet('Tin cho ' + S.kh.kh.ten, textKhach(S.kh.kh, due), S.kh.kh.sdt, due.map(i => i.id), 'khách');
+}
+async function tiepTuc(i) {
+  try { await callW('api_ghiKetQua', [{ ids: [S.kh.items[i].id], action: 'TIEP_TUC' }], { chiTiet: S.kh.kh.ma }); toast('Đã bật lại nhắc'); showKhach(); } catch (e) { toast(errMsg(e), true); }
+}
+function suaHangMuc(i) {
+  const it = S.kh.items[i];
+  openSheet('Sửa lịch · ' + it.ten, `<p class="note" style="margin-top:0">Dùng khi nhập sai ngày hoặc nước nhà khách cần chu kỳ khác. Việc sửa không tính là “đã thay”.</p>
+    <div class="field"><label>Ngày làm gần nhất</label><input type="date" id="sLast" value="${it.lastDone}" max="${S.init.today}"></div>
+    <div class="grid2"><div class="field"><label>Chu kỳ</label><input type="number" id="sCycle" min="1" value="${it.cycle || ''}"></div>
+    <div class="field"><label>Đơn vị</label><select id="sUnit">${['ngày', 'tháng', 'năm'].map(u => `<option ${u === it.unit ? 'selected' : ''}>${u}</option>`).join('')}</select></div></div>
+    <div class="field"><label>Nhắc trước (ngày)</label><input type="number" id="sLead" min="0" value="${it.lead}"></div>
+    <button class="btn primary block" onclick="saveSua(this,${i})">Lưu</button>
+    ${it.state !== 'paused' ? `<button class="btn block" style="margin-top:8px" onclick="tamDung(this,${i})">Tạm dừng nhắc hạng mục này</button>` : ''}`);
+}
+async function saveSua(btn, i) {
+  busy(btn, true);
+  try { await callW('api_ghiKetQua', [{ ids: [S.kh.items[i].id], action: 'SUA', date: $('#sLast').value, cycle: $('#sCycle').value, unit: $('#sUnit').value, lead: $('#sLead').value }], { chiTiet: S.kh.kh.ma }); toast('Đã lưu'); showKhach(); }
+  catch (e) { busy(btn, false); toast(errMsg(e), true); }
+}
+async function tamDung(btn, i) {
+  busy(btn, true);
+  try { await callW('api_ghiKetQua', [{ ids: [S.kh.items[i].id], action: 'TAM_DUNG', note: 'Tạm dừng từ trang khách' }], { chiTiet: S.kh.kh.ma }); toast('Đã tạm dừng'); showKhach(); }
+  catch (e) { busy(btn, false); toast(errMsg(e), true); }
+}
+
+function deviceChooser(selected) {
+  const ck = S.init.chuKy;
+  const groups = [...new Set(ck.map(c => c.nhom).filter(Boolean))];
+  return `<div class="field"><label>Thiết bị đã lắp (chọn để tự đánh dấu hạng mục)</label><div class="chips">${groups.map(g => `<button type="button" class="chip" data-g="${esc(g)}" onclick="toggleGroup(this)">${esc(g)}</button>`).join('')}</div>
+   <div class="card" style="padding:4px 12px">${ck.map(c => `<label class="check"><input type="checkbox" name="hm" value="${esc(c.ma)}" data-g="${esc(c.nhom)}" ${c.bat ? '' : 'disabled'} ${selected && selected.includes(c.ma) ? 'checked' : ''}><span>${esc(c.ten)}<br><span class="muted">${esc(c.nhom)} · ${c.bat ? 'mỗi ' + cycleText(c.cycle, c.unit) : 'chưa bật trong tab ChuKy'}</span></span></label>`).join('')}</div></div>`;
+}
+function toggleGroup(b) {
+  const on = !b.classList.contains('on'); b.classList.toggle('on', on);
+  document.querySelectorAll(`input[name=hm][data-g="${CSS.escape(b.dataset.g)}"]`).forEach(x => { if (!x.disabled) x.checked = on; });
+}
+function formKhach(k) {
+  const isNew = !k; k = k || { nhom: 'Nhắc', maDL: S.dueOpts.dealer && S.dueOpts.dealer !== 'ALL' ? S.dueOpts.dealer : '' };
+  const dl = '<option value="">— Chưa gán (A12 trực tiếp) —</option>' + S.init.dealers.map(d => `<option value="${esc(d.ma)}" ${d.ma === k.maDL ? 'selected' : ''}>${esc(d.ten)}</option>`).join('');
+  openSheet(isNew ? 'Thêm khách & lắp đặt' : 'Sửa thông tin khách', `
+    <div class="field"><label>Tên khách *</label><input type="text" id="fTen" value="${esc(k.ten)}"></div>
+    <div class="grid2"><div class="field"><label>SĐT / Zalo</label><input type="tel" id="fSdt" value="${esc(k.sdt)}" inputmode="tel"></div>
+    <div class="field"><label>Khu vực</label><input type="text" id="fKv" value="${esc(k.khuVuc)}" placeholder="VD: Hà Đông"></div></div>
+    <div class="field"><label>Địa chỉ</label><input type="text" id="fDc" value="${esc(k.diaChi)}"></div>
+    <div class="grid2"><div class="field"><label>Đại lý phụ trách</label><select id="fDl">${dl}</select></div>
+    <div class="field"><label>Nhóm thí điểm</label><select id="fNhom">${S.init.nhom.map(n => `<option ${n === k.nhom ? 'selected' : ''}>${n}</option>`).join('')}</select></div></div>
+    <div class="field"><label>Ghi chú</label><input type="text" id="fGc" value="${esc(k.ghiChu)}" placeholder="VD: nước giếng khoan nhiễm sắt"></div>
+    ${isNew ? `<div class="field"><label>Ngày lắp / thay gần nhất</label><input type="date" id="fNgay" value="${S.init.today}" max="${S.init.today}"></div>${deviceChooser()}` : ''}
+    <button class="btn primary block" onclick="saveKhach(this,${isNew ? 'null' : `'${esc(k.ma)}'`})">Lưu</button>`);
+}
+async function saveKhach(btn, ma, force) {
+  const d = { ma: ma || '', ten: $('#fTen').value, sdt: $('#fSdt').value, khuVuc: $('#fKv').value, diaChi: $('#fDc').value, maDL: $('#fDl').value, nhom: $('#fNhom').value, ghiChu: $('#fGc').value, force: !!force };
+  if (!ma) { d.ngayLap = $('#fNgay').value; d.hangMuc = [...document.querySelectorAll('input[name=hm]:checked')].map(x => x.value); if (!d.hangMuc.length && !confirm('Chưa chọn hạng mục nhắc nào. Vẫn lưu?')) return; }
+  if (!d.ten.trim()) return toast('Nhập tên khách', true);
+  busy(btn, true);
+  try {
+    const r = (await callW('api_luuKhach', [d], { chiTiet: true })).result;
+    if (r.duplicate) {
+      busy(btn, false);
+      if (confirm(`SĐT này đã có ở khách ${r.ma} (${r.ten}).\nBấm OK để mở khách cũ, Hủy để vẫn tạo khách mới.`)) return showKhach();
+      return saveKhach(btn, ma, true);
+    }
+    toast(ma ? 'Đã lưu' : 'Đã thêm ' + r.ma + ' với ' + r.added + ' hạng mục'); showKhach();
+  } catch (e) { busy(btn, false); toast(errMsg(e), true); }
+}
+function themHangMuc() {
+  const have = S.kh.items.filter(i => i.state !== 'paused').map(i => i.ma);
+  openSheet('Thêm hạng mục nhắc', `<div class="field"><label>Ngày lắp / thay gần nhất</label><input type="date" id="fNgay" value="${S.init.today}" max="${S.init.today}"></div>${deviceChooser()}
+    <p class="note">Hạng mục khách đã có sẽ được bỏ qua: ${have.length ? esc(have.join(', ')) : 'chưa có'}.</p>
+    <button class="btn primary block" onclick="saveThemHM(this)">Thêm</button>`);
+}
+async function saveThemHM(btn) {
+  const hm = [...document.querySelectorAll('input[name=hm]:checked')].map(x => x.value);
+  if (!hm.length) return toast('Chọn ít nhất một hạng mục', true);
+  busy(btn, true);
+  try { const r = (await callW('api_luuKhach', [Object.assign({}, S.kh.kh, { ngayLap: $('#fNgay').value, hangMuc: hm })], { chiTiet: true })).result; toast('Đã thêm ' + r.added + ' hạng mục'); showKhach(); }
+  catch (e) { busy(btn, false); toast(errMsg(e), true); }
+}
+
+/* ---------------- SỔ HẠN A12 ---------------- */
+function viewSoHan() {
+  const r = { list: S.init.soHan || [] };
+  S.soHan = r.list;
+  const n = s => r.list.filter(x => x.state === s).length;
+  const lab = { expired: 'Đã quá hạn', soon: 'Sắp hết hạn', nodata: 'Chưa có ngày hết hạn — cần điền', ok: 'Còn xa', closed: 'Ngừng theo dõi' };
+  let h = `<div class="between"><h2>Sổ hạn A12</h2><button class="btn primary sm" onclick="formSoHan()">+ Thêm mục</button></div>
+    <div class="stats"><div class="stat hot"><b>${n('expired')}</b><span>Quá hạn</span></div><div class="stat"><b>${n('soon')}</b><span>Sắp hết hạn</span></div><div class="stat"><b>${n('nodata')}</b><span>Chưa có ngày</span></div></div>`;
+  let last = '';
+  r.list.forEach((v, i) => {
+    if (v.state !== last) { h += `<div class="sec">${lab[v.state]}</div>`; last = v.state; }
+    const b = v.state === 'expired' ? `<span class="badge b-red">Quá hạn ${-v.days} ngày</span>` : v.state === 'soon' ? `<span class="badge b-amber">Còn ${v.days} ngày</span>` : v.state === 'ok' ? `<span class="badge b-green">Còn ${v.days} ngày</span>` : v.state === 'nodata' ? '<span class="badge b-grey">Thiếu ngày</span>' : '<span class="badge b-grey">Ngừng</span>';
+    h += `<button class="list-item" onclick="formSoHan(${i})"><div class="between"><div><b>${esc(v.ten)}</b><div class="muted">${esc(v.loai)}${v.ngayHet ? ' · hết hạn ' + dmy(v.ngayHet) : ''}${v.phuTrach ? ' · ' + esc(v.phuTrach) : ' · chưa có người phụ trách'}</div></div>${b}</div></button>`;
+  });
+  if (!r.list.length) h += '<div class="empty">Chưa có mục nào.</div>';
+  main().innerHTML = h;
+}
+function formSoHan(i) {
+  const v = i === undefined ? { lead: 30, trangThai: 'Đang theo dõi', dungTen: 'Công ty', loai: 'Khác' } : S.soHan[i];
+  const sel = (id, arr, cur) => `<select id="${id}">${arr.map(x => `<option ${x === cur ? 'selected' : ''}>${esc(x)}</option>`).join('')}</select>`;
+  openSheet(v.id ? 'Sửa mục Sổ hạn' : 'Thêm mục Sổ hạn', `
+    <div class="field"><label>Hạng mục *</label><input type="text" id="hTen" value="${esc(v.ten)}" placeholder="VD: Tên miền congnghea12.com"></div>
+    <div class="grid2"><div class="field"><label>Loại</label>${sel('hLoai', S.init.loaiSoHan, v.loai)}</div>
+    <div class="field"><label>Ngày hết hạn</label><input type="date" id="hNgay" value="${v.ngayHet || ''}"></div></div>
+    <div class="grid2"><div class="field"><label>Nhắc trước (ngày)</label><input type="number" id="hLead" min="0" value="${v.lead}"></div>
+    <div class="field"><label>Đứng tên</label>${sel('hDung', ['Công ty', 'Cá nhân', 'Chưa rõ'], v.dungTen)}</div></div>
+    <div class="grid2"><div class="field"><label>Người phụ trách</label><input type="text" id="hPT" value="${esc(v.phuTrach)}"></div>
+    <div class="field"><label>Người dự phòng</label><input type="text" id="hDP" value="${esc(v.duPhong)}"></div></div>
+    <div class="field"><label>Nơi gia hạn / tài khoản đăng nhập (không ghi mật khẩu)</label><input type="text" id="hNoi" value="${esc(v.noiGiaHan)}"></div>
+    <div class="field"><label>Ghi chú</label><input type="text" id="hGc" value="${esc(v.ghiChu)}"></div>
+    <div class="field"><label>Trạng thái</label>${sel('hTT', ['Đang theo dõi', 'Ngừng theo dõi'], v.trangThai)}</div>
+    <button class="btn primary block" onclick="saveSoHan(this,'${esc(v.id || '')}')">Lưu</button>
+    ${v.id ? `<div class="sec">Đã gia hạn xong?</div><div class="row"><input type="date" id="hMoi" style="flex:1"><button class="btn" onclick="giaHan(this,${i})">Ghi gia hạn</button></div><p class="note">Nhập ngày hết hạn MỚI. App ghi lại lịch sử gia hạn.</p>` : ''}`);
+}
+function soHanForm() { return { ten: $('#hTen').value, loai: $('#hLoai').value, ngayHet: $('#hNgay').value, lead: $('#hLead').value, dungTen: $('#hDung').value, phuTrach: $('#hPT').value, duPhong: $('#hDP').value, noiGiaHan: $('#hNoi').value, ghiChu: $('#hGc').value, trangThai: $('#hTT').value }; }
+async function saveSoHan(btn, id) {
+  const d = soHanForm(); d.id = id;
+  if (!d.ten.trim()) return toast('Nhập tên hạng mục', true);
+  busy(btn, true);
+  try { await callW('api_luuSoHan', [d]); toast('Đã lưu'); closeSheet(); viewSoHan(); } catch (e) { busy(btn, false); toast(errMsg(e), true); }
+}
+async function giaHan(btn, i) {
+  const moi = $('#hMoi').value; if (!moi) return toast('Chọn ngày hết hạn mới', true);
+  const d = soHanForm(); d.id = S.soHan[i].id; d.ngayHet = moi; d.giaHan = true;
+  busy(btn, true);
+  try { await callW('api_luuSoHan', [d]); toast('Đã ghi gia hạn tới ' + dmy(moi)); closeSheet(); viewSoHan(); } catch (e) { busy(btn, false); toast(errMsg(e), true); }
+}
+
+/* ---------------- THÍ ĐIỂM ---------------- */
+async function viewThiDiem() {
+  loading();
+  let r; try { r = await call('api_thiDiem'); } catch (e) { return fatal(errMsg(e)); }
+  const pct = x => x === null || x === undefined ? '—' : (x * 100).toFixed(0) + '%';
+  let h = `<h2>Đo thí điểm</h2><p class="muted" style="margin-top:-6px">So tỷ lệ khách có thay giữa nhóm được nhắc và nhóm đối chứng (không nhắc).</p>`;
+  if (!r.ready) {
+    h += `<div class="card accent"><h3>Chưa bắt đầu đo</h3><p>${esc(r.message)} Khách hiện có: ${r.counts['Nhắc']} nhóm Nhắc, ${r.counts['Đối chứng']} nhóm Đối chứng.</p>${S.init.isAdmin ? '<button class="btn primary" onclick="formThiDiem()">Đặt ngày bắt đầu</button>' : '<p class="muted">Quản trị đặt ngày bắt đầu ở đây.</p>'}</div>`;
+  } else {
+    const n = r.groups['Nhắc'], d = r.groups['Đối chứng'];
+    const cls = r.verdict === 'pass' ? 'v-pass' : r.verdict === 'fail' ? 'v-fail' : 'v-wait';
+    h += `<div class="card"><div class="between"><div>Khung đo: <b>${dmy(r.start)} → ${dmy(r.end)}</b> (${r.days} ngày)<br><span class="muted">Ngưỡng đạt: nhóm Nhắc ≥ ×${String(r.threshold).replace('.', ',')} nhóm Đối chứng · tối thiểu ${r.minSample} khách/nhóm</span></div>${S.init.isAdmin ? '<button class="btn sm" onclick="formThiDiem()">Sửa</button>' : ''}</div></div>
+      <div class="scroll"><table class="t"><tr><th>Nhóm</th><th>Tổng khách</th><th>Đến hạn trong khung</th><th>Đã thay</th><th>Tỷ lệ</th></tr>
+      <tr><td><b>Nhắc</b></td><td>${r.counts['Nhắc']}</td><td>${n.scope}</td><td>${n.done}</td><td><b>${pct(n.rate)}</b></td></tr>
+      <tr><td><b>Đối chứng</b></td><td>${r.counts['Đối chứng']}</td><td>${d.scope}</td><td>${d.done}</td><td><b>${pct(d.rate)}</b></td></tr></table></div>
+      <p>Hệ số: <b>${r.ratio === null ? '—' : '×' + r.ratio.toFixed(2).replace('.', ',')}</b></p>
+      <div class="verdict ${cls}">${esc(r.message)}</div>`;
+  }
+  h += `<div class="sec">Cách đọc</div><ul class="small" style="padding-left:18px;margin:0">
+    <li>“Đến hạn trong khung” = khách có ít nhất một hạng mục đến hạn trước ngày kết thúc khung đo.</li>
+    <li>“Đã thay” chỉ đếm khi có ghi kết quả <b>Đã thay</b> với ngày nằm trong khung đo.</li>
+    <li>Đại lý phải báo lại mọi lần thay, <b>kể cả khách nhóm Đối chứng</b>. Báo thiếu nhóm Đối chứng sẽ làm kết quả đẹp giả.</li>
+    <li>Chia nhóm ngẫu nhiên khi nhập khách (ví dụ khách số chẵn/lẻ), không chọn khách “dễ” vào nhóm Nhắc.</li></ul>`;
+  main().innerHTML = h;
+}
+function formThiDiem() {
+  const t = S.init.thietLap;
+  openSheet('Thiết lập thí điểm', `<div class="field"><label>Ngày bắt đầu đo</label><input type="date" id="tStart" value="${t.NgayBatDauThiDiem || S.init.today}"></div>
+    <div class="grid2"><div class="field"><label>Số ngày đo</label><input type="number" id="tDays" min="7" value="${t.SoNgayDo}"></div><div class="field"><label>Ngưỡng (lần)</label><input type="number" id="tThr" step="0.1" min="1" value="${t.NguongHieuQua}"></div></div>
+    <div class="field"><label>Mẫu tối thiểu mỗi nhóm (khách)</label><input type="number" id="tMin" min="1" value="${t.MauToiThieu}"></div>
+    <button class="btn primary block" onclick="saveThiDiem(this)">Lưu</button>`);
+}
+async function saveThiDiem(btn) {
+  const kv = { NgayBatDauThiDiem: $('#tStart').value, SoNgayDo: Number($('#tDays').value), NguongHieuQua: Number($('#tThr').value), MauToiThieu: Number($('#tMin').value) };
+  busy(btn, true);
+  try { await callW('api_luuThietLap', [kv]); toast('Đã lưu'); closeSheet(); viewThiDiem(); } catch (e) { busy(btn, false); toast(errMsg(e), true); }
+}
+
+/* ---------------- CÀI ĐẶT ---------------- */
+function viewCaiDat() {
+  S.users = S.init.users || [];
+  const I = S.init;
+  let h = '<h2>Cài đặt</h2>';
+  h += `<div class="between" style="margin-top:8px"><h3>Đại lý</h3><button class="btn sm" onclick="formDaiLy()">+ Thêm</button></div>`;
+  h += I.dealers.length ? I.dealers.map((d, i) => `<button class="list-item" onclick="formDaiLy(${i})"><b>${esc(d.ten)}</b> <span class="muted">${esc(d.ma)}</span><div class="muted">${esc(d.khuVuc || '')}${d.sdt ? ' · ' + phoneFmt(d.sdt) : ' · chưa có SĐT/Zalo'}${d.phuTrach ? ' · A12: ' + esc(d.phuTrach) : ''}</div></button>`).join('') : '<p class="muted">Chưa có đại lý. Thêm 2–3 đại lý thí điểm trước khi nhập khách.</p>';
+  h += `<div class="between" style="margin-top:20px"><h3>Người dùng</h3><button class="btn sm" onclick="formUser()">+ Thêm</button></div>`;
+  h += S.users.map((u, i) => `<button class="list-item" onclick="formUser(${i})"><div class="between"><div><b>${esc(u.ten || u.email)}</b><div class="muted">${esc(u.email)} · ${esc(u.role)}${u.email7h ? ' · nhận email 7h' : ''}</div></div>${u.active ? '' : '<span class="badge b-grey">Đã khóa</span>'}</div></button>`).join('');
+  h += `<div class="sec">Nhập khách hàng loạt</div><div class="card"><p class="small" style="margin-top:0">Dán danh sách vào tab <b>NhapKhach</b> của Google Sheet (mỗi khách một dòng), rồi bấm nút dưới. Cột “Hạng mục” nhận mã (RO1, MUOI…) hoặc tên nhóm thiết bị (Máy lọc RO, Lọc tổng, Cột làm mềm…), cách nhau dấu phẩy. Kết quả từng dòng ghi vào cột “Kết quả nhập”; dòng đã có kết quả sẽ không nhập lại.</p>
+    <button class="btn primary" onclick="nhapKhach(this)">Xử lý tab NhapKhach</button></div>`;
+  h += `<div class="sec">Chu kỳ nhắc mặc định</div><p class="note">Sửa trong tab <b>ChuKy</b> của Google Sheet. Thay đổi áp dụng cho khách thêm mới; khách cũ sửa riêng ở trang khách (Sửa lịch).</p>
+    <div class="scroll"><table class="t"><tr><th>Mã</th><th>Hạng mục</th><th>Chu kỳ</th><th>Nhắc trước</th><th>Nguồn</th></tr>${I.chuKy.map(c => `<tr><td>${esc(c.ma)}</td><td>${esc(c.ten)}<div class="muted">${esc(c.nhom)}${c.bat ? '' : ' · tắt'}</div></td><td>${cycleText(c.cycle, c.unit)}</td><td>${c.lead} ngày</td><td class="muted">${esc(c.nguon)}</td></tr>`).join('')}</table></div>`;
+  h += `<div class="sec">Khác</div><div class="actions"><button class="btn" onclick="emailThu(this)">Gửi email tổng hợp thử</button>${I.sheetUrl ? `<a class="btn" href="${esc(I.sheetUrl)}" target="_blank" rel="noopener">Mở Google Sheet dữ liệu</a>` : ''}</div>
+    <p class="note">Phiên bản ${esc(I.version)}.</p>`;
+  main().innerHTML = h;
+}
+function formDaiLy(i) {
+  const d = i === undefined ? {} : S.init.dealers[i];
+  openSheet(d.ma ? 'Sửa đại lý' : 'Thêm đại lý', `<div class="field"><label>Tên đại lý *</label><input type="text" id="dTen" value="${esc(d.ten)}"></div>
+    <div class="grid2"><div class="field"><label>Mã (để trống = tự tạo)</label><input type="text" id="dMa" value="${esc(d.ma)}" ${d.ma ? 'disabled' : ''}></div><div class="field"><label>SĐT / Zalo</label><input type="tel" id="dSdt" value="${esc(d.sdt)}"></div></div>
+    <div class="grid2"><div class="field"><label>Khu vực</label><input type="text" id="dKv" value="${esc(d.khuVuc)}"></div><div class="field"><label>Người phụ trách A12</label><input type="text" id="dPT" value="${esc(d.phuTrach)}"></div></div>
+    <div class="field"><label>Ghi chú</label><input type="text" id="dGc" value="${esc(d.ghiChu)}"></div>
+    <button class="btn primary block" onclick="saveDaiLy(this,'${esc(d.ma || '')}')">Lưu</button>`);
+}
+async function saveDaiLy(btn, ma) {
+  const d = { ma: ma || $('#dMa').value.trim(), ten: $('#dTen').value, sdt: $('#dSdt').value, khuVuc: $('#dKv').value, phuTrach: $('#dPT').value, ghiChu: $('#dGc').value };
+  busy(btn, true);
+  try { await callW('api_luuDaiLy', [d]); toast('Đã lưu'); closeSheet(); viewCaiDat(); } catch (e) { busy(btn, false); toast(errMsg(e), true); }
+}
+function formUser(i) {
+  const u = i === undefined ? { role: 'CSKH', email7h: true, active: true } : S.users[i];
+  openSheet(u.email ? 'Sửa người dùng' : 'Thêm người dùng', `<div class="field"><label>Email *</label><input type="email" id="uEmail" value="${esc(u.email)}" ${u.email ? 'disabled' : ''}></div>
+    <div class="field"><label>Tên</label><input type="text" id="uTen" value="${esc(u.ten)}"></div>
+    <div class="field"><label>Vai trò</label><select id="uRole">${S.init.roles.map(r => `<option ${r === u.role ? 'selected' : ''}>${r}</option>`).join('')}</select><p class="note">CSKH: nhắc khách. Hành chính: Sổ hạn A12. Quản trị: tất cả.</p></div>
+    <label class="check"><input type="checkbox" id="uMail" ${u.email7h ? 'checked' : ''}><span>Nhận email tổng hợp mỗi sáng</span></label>
+    <label class="check"><input type="checkbox" id="uActive" ${u.active ? 'checked' : ''}><span>Đang dùng (bỏ chọn để khóa link)</span></label>
+    ${u.email ? '<label class="check"><input type="checkbox" id="uNew"><span>Cấp link mới (link cũ hết hiệu lực)</span></label>' : ''}
+    <button class="btn primary block" style="margin-top:10px" onclick="saveUser(this)">Lưu</button>
+    ${u.link ? `<div class="sec">Link cá nhân</div><div class="row"><input type="text" id="uLink" value="${esc(u.link)}" readonly style="flex:1"><button class="btn" onclick="copyLink()">Chép</button></div>` : ''}`);
+}
+async function saveUser(btn) {
+  const d = { email: $('#uEmail').value, ten: $('#uTen').value, role: $('#uRole').value, email7h: $('#uMail').checked, active: $('#uActive').checked, newLink: $('#uNew') ? $('#uNew').checked : false };
+  busy(btn, true);
+  try {
+    const r = (await callW('api_luuNguoiDung', [d])).result; S.users = S.init.users || []; busy(btn, false);
+    openSheet('Link cho ' + (d.ten || d.email), r.link ? `<p class="small" style="margin-top:0">Gửi link này riêng cho người dùng (qua Zalo). Ai có link là vào được, không chia sẻ vào nhóm.</p><div class="row"><input type="text" id="uLink" value="${esc(r.link)}" readonly style="flex:1"><button class="btn primary" onclick="copyLink()">Chép</button></div>` : '<p>Đã lưu. Chưa tạo được link vì tab ThietLap chưa có WebAppUrl.</p>');
+    viewCaiDat();
+  } catch (e) { busy(btn, false); toast(errMsg(e), true); }
+}
+async function copyLink() { const ok = await copyText($('#uLink').value); toast(ok ? 'Đã chép link' : 'Không chép tự động được — giữ tay vào ô để chép', !ok); }
+async function nhapKhach(btn) {
+  busy(btn, true);
+  try { const r = (await callW('api_nhapKhach', [])).result; busy(btn, false); toast(`Nhập xong: ${r.ok} khách OK, ${r.err} dòng lỗi/trùng (xem cột Kết quả nhập)`, r.err > 0); }
+  catch (e) { busy(btn, false); toast(errMsg(e), true); }
+}
+async function emailThu(btn) {
+  busy(btn, true);
+  try { const r = await call('api_guiEmailThu'); busy(btn, false); toast('Đã gửi email thử tới ' + r.to); } catch (e) { busy(btn, false); toast(errMsg(e), true); }
+}
+
+boot();
+</script>
+</body>
+</html>
