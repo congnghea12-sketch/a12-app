@@ -116,7 +116,7 @@ a{color:var(--red)}
 </div>
 <div id="toast" class="toast"></div>
 <script>
-var API_URL = 'https://script.google.com/macros/s/AKfycbwx6q0D0QPiuaan0a3HZoL2N3uCUb_j5-yOVudxthYDkjlMorCRtdN2xcURKdS7YVU1/exec', WEB_VERSION = '1.6';
+var API_URL = 'https://script.google.com/macros/s/AKfycbwx6q0D0QPiuaan0a3HZoL2N3uCUb_j5-yOVudxthYDkjlMorCRtdN2xcURKdS7YVU1/exec', WEB_VERSION = '1.6c';
 var TOKEN = (function () {
   var m = (location.hash + '&' + location.search).match(/[#?&]k=([A-Za-z0-9]{20,80})/), t = m ? m[1] : '';
   try { if (t) localStorage.setItem('a12k', t); else t = localStorage.getItem('a12k') || ''; } catch (e) {}
@@ -285,7 +285,7 @@ const ICONS = {
   thidiem: '<svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg>',
   caidat: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>'
 };
-const TABS = [['due', 'Đến hạn', 'canKhach'], ['khach', 'Khách', 'canKhach'], ['sohan', 'Sổ hạn', 'canSoHan'], ['thidiem', 'Thí điểm', 'canKhach'], ['caidat', 'Cài đặt', 'isAdmin']];
+const TABS = [['due', 'Đến hạn', 'canKhach'], ['khach', 'Khách', 'canKhach'], ['sohan', 'Sổ hạn', 'canSoHan'], ['caidat', 'Cài đặt', 'isAdmin']];
 
 async function boot() {
   if (!S.token) return askLink();
@@ -485,7 +485,7 @@ function showKhach() { // hiện khách đang có trong S.kh (sau khi lưu), kh�
 function renderKhach() {
   const r = S.kh, k = r.kh, dl = dealerOf(k.maDL);
   let h = `<button class="btn ghost back" onclick="viewKhach()">‹ Danh sách khách</button>
-    <div class="card"><div class="between"><div><h3>${esc(k.ten)}</h3><div class="muted">${esc(k.ma)} · nhóm ${esc(k.nhom)}</div></div><button class="btn sm" onclick="formKhach(S.kh.kh)">Sửa</button></div>
+    <div class="card"><div class="between"><div><h3>${esc(k.ten)}</h3><div class="muted">${esc(k.ma)}</div></div><button class="btn sm" onclick="formKhach(S.kh.kh)">Sửa</button></div>
     <div class="small" style="margin-top:8px">${k.sdt ? `<a href="tel:${esc(k.sdt)}">${phoneFmt(k.sdt)}</a> · <a href="https://zalo.me/${esc(k.sdt)}" target="_blank" rel="noopener">Zalo</a>` : 'Chưa có SĐT'}<br>${esc(k.diaChi || '')}${k.khuVuc ? ' · ' + esc(k.khuVuc) : ''}<br>Đại lý: ${dl ? esc(dl.ten) : 'chưa gán'}${k.ghiChu ? '<br>Ghi chú: ' + esc(k.ghiChu) : ''}</div></div>
     <div class="between" style="margin-top:16px"><h3>Lịch bảo trì</h3><button class="btn sm" onclick="themHangMuc()">+ Thêm hạng mục</button></div>`;
   if (!r.items.length) h += '<div class="empty">Chưa có hạng mục nhắc nào.</div>';
@@ -570,8 +570,8 @@ function formKhach(k) {
     <div class="grid2"><div class="field"><label>SĐT / Zalo</label><input type="tel" id="fSdt" value="${esc(k.sdt)}" inputmode="tel"></div>
     <div class="field"><label>Khu vực</label><input type="text" id="fKv" value="${esc(k.khuVuc)}" placeholder="VD: Hà Đông"></div></div>
     <div class="field"><label>Địa chỉ</label><input type="text" id="fDc" value="${esc(k.diaChi)}"></div>
-    <div class="grid2"><div class="field"><label>Đại lý phụ trách</label><select id="fDl">${dl}</select></div>
-    <div class="field"><label>Nhóm thí điểm</label><select id="fNhom">${S.init.nhom.map(n => `<option ${n === k.nhom ? 'selected' : ''}>${n}</option>`).join('')}</select></div></div>
+    <div class="field"><label>Đại lý phụ trách</label><select id="fDl">${dl}</select></div>
+    <input type="hidden" id="fNhom" value="${esc(k.nhom || 'Nhắc')}">
     <div class="field"><label>Ghi chú</label><input type="text" id="fGc" value="${esc(k.ghiChu)}" placeholder="VD: nước giếng khoan nhiễm sắt"></div>
     ${isNew ? `<div class="field"><label>Ngày lắp / thay gần nhất</label><input type="date" id="fNgay" value="${S.init.today}" max="${S.init.today}"></div>${deviceChooser()}` : ''}
     <button class="btn primary block" onclick="saveKhach(this,${isNew ? 'null' : `'${esc(k.ma)}'`})">Lưu</button>`);
