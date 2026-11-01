@@ -116,7 +116,7 @@ a{color:var(--red)}
 </div>
 <div id="toast" class="toast"></div>
 <script>
-var API_URL = 'https://script.google.com/macros/s/AKfycbwx6q0D0QPiuaan0a3HZoL2N3uCUb_j5-yOVudxthYDkjlMorCRtdN2xcURKdS7YVU1/exec', WEB_VERSION = '1.6c';
+var API_URL = 'https://script.google.com/macros/s/AKfycbwx6q0D0QPiuaan0a3HZoL2N3uCUb_j5-yOVudxthYDkjlMorCRtdN2xcURKdS7YVU1/exec', WEB_VERSION = '1.7';
 var TOKEN = (function () {
   var m = (location.hash + '&' + location.search).match(/[#?&]k=([A-Za-z0-9]{20,80})/), t = m ? m[1] : '';
   try { if (t) localStorage.setItem('a12k', t); else t = localStorage.getItem('a12k') || ''; } catch (e) {}
@@ -323,15 +323,17 @@ function viewDue() {
   if (c.snoozed) notes.push(c.snoozed + ' hạng mục đang hẹn lại');
   if (c.control) notes.push(c.control + ' hạng mục của nhóm Đối chứng không hiện (để đo thí điểm)');
   if (notes.length) h += `<p class="note">${notes.join(' · ')}.</p>`;
+  const Z = S.init.zalo, zOk = zaloSan();
+  if (zOk) h += `<p class="note">Zalo: ${Z.tuDong ? 'tự động <b>BẬT</b>, gửi từ ' + Z.gio + 'h mỗi ngày cho khách chưa được báo' : 'tự động <b>TẮT</b> — bấm “Gửi Zalo” từng khách hoặc cả kho'} · hôm nay đã gửi ${Z.daGui}/${Z.tran} tin${Z.lanChay ? ' · lần chạy gần nhất: ' + esc(Z.lanChay) : ''}.</p>`;
   if (!r.groups.length) h += '<div class="empty">Không có khách nào cần nhắc lúc này.</div>';
   r.groups.forEach((g, gi) => {
     h += `<div class="group-h"><div><h3>${esc(g.dealer.ten)}</h3><div class="muted">${g.customers.length} khách${g.dealer.sdt ? ' · ' + phoneFmt(g.dealer.sdt) : ''}</div></div>
-      <button class="btn sm" onclick="sendDealer(${gi})">Gửi danh sách</button></div>`;
+      <div class="row" style="gap:6px">${zOk ? `<button class="btn sm" onclick="guiZaloKho(${gi})">Zalo cả kho</button>` : ''}<button class="btn sm" onclick="sendDealer(${gi})">Gửi danh sách</button></div></div>`;
     g.customers.forEach((e, ci) => {
       h += `<div class="kh"><div class="between"><div><div class="kh-name">${esc(e.kh.ten)}</div><div class="muted">${e.kh.sdt ? `<a href="tel:${esc(e.kh.sdt)}">${phoneFmt(e.kh.sdt)}</a>` : 'Chưa có SĐT'}${e.kh.diaChi ? ' · ' + esc(e.kh.diaChi) : ''}</div></div>
         <button class="btn ghost sm" onclick="openKhach('${esc(e.kh.ma)}')">Chi tiết</button></div><ul class="items">`;
       e.items.forEach(it => { h += `<li><span>${esc(it.ten)}${it.notified ? ` <span class="tag">· đã báo ${dm(it.notifiedAt)}</span>` : ''}</span>${itemBadge(it)}</li>`; });
-      h += `</ul><div class="actions"><button class="btn sm" onclick="msgKhach(${gi},${ci})">Tin cho khách</button><button class="btn sm primary" onclick="ketQua(${gi},${ci})">Ghi kết quả</button></div></div>`;
+      h += `</ul><div class="actions">${zOk && e.kh.sdt ? `<button class="btn sm primary" onclick="guiZaloKhach(${gi},${ci},this)">Gửi Zalo</button>` : ''}<button class="btn sm" onclick="msgKhach(${gi},${ci})">Tin cho khách</button><button class="btn sm primary" onclick="ketQua(${gi},${ci})">Ghi kết quả</button></div></div>`;
     });
   });
   main().innerHTML = h;
@@ -425,6 +427,41 @@ function sendDealer(gi) {
   const text = fillT(S.init.mauTin.DAI_LY, { dai_ly: g.dealer.ten, so_khach: g.customers.length, danh_sach: list, tin_mau: sample });
   const ids = []; g.customers.forEach(e => e.items.forEach(i => ids.push(i.id)));
   msgSheet('Gửi ' + g.dealer.ten, text, g.dealer.sdt, ids, 'đại lý');
+}
+
+/* ---- Gửi tin Zalo (ZBS theo SĐT) qua máy chủ — giao diện 1.7 ---- */
+const zaloSan = () => !!(S.init.zalo && S.init.zalo.san);
+function ketQuaZalo(r) {
+  let msg = r.sent ? 'Đã gửi Zalo ' + r.sent + ' khách' : 'Chưa gửi được tin nào';
+  if (r.fail) msg += ' · ' + r.fail + ' lỗi';
+  if (r.het) msg += ' · còn ' + r.het + ' khách chưa gửi' + (r.trongNgay ? ' (hết trần ' + r.tran + ' tin/ngày)' : '');
+  return { msg, loi: (r.loi || []).concat(r.boQua || []) };
+}
+async function guiZaloKhach(gi, ci, btn) {
+  const e = S.due.groups[gi].customers[ci];
+  busy(btn, true); btn.textContent = 'Đang gửi…';
+  try {
+    const r = (await callW('api_guiZalo', [{ ma: [e.kh.ma], guiLai: true }])).result, k = ketQuaZalo(r);
+    if (r.sent) { toast('Đã gửi Zalo cho ' + e.kh.ten); rerender(); }
+    else { busy(btn, false); toast((k.loi[0] ? k.loi[0].msg : k.msg) + ' — có thể dùng “Tin cho khách” để nhắn tay.', true); }
+  } catch (err) { busy(btn, false); toast(errMsg(err), true); }
+}
+function guiZaloKho(gi) {
+  const g = S.due.groups[gi], Z = S.init.zalo;
+  const ds = g.customers.filter(e => e.kh.sdt && e.items.some(i => !i.notified));
+  if (!ds.length) return toast('Kho này không còn khách chưa báo có SĐT', true);
+  S.zaloMa = ds.map(e => e.kh.ma);
+  const con = Math.max(0, Z.tran - Z.daGui), n = Math.min(ds.length, con);
+  openSheet('Gửi Zalo · ' + g.dealer.ten, `<p class="small" style="margin-top:0">Gửi tin Zalo (mẫu đã được Zalo duyệt) cho <b>${ds.length} khách</b> chưa được báo trong danh sách đang lọc. Hạng mục đã báo tay sẽ không gửi lại.</p>
+    <p class="note">Hôm nay đã gửi ${Z.daGui}/${Z.tran} tin.${ds.length > con ? ' Chỉ gửi được thêm ' + con + ' khách, số còn lại để hôm sau.' : ''} Mỗi khách mất khoảng 1 giây.</p>
+    <button class="btn primary block" onclick="guiZaloLo(this)" ${n ? '' : 'disabled'}>${n ? 'Gửi ' + n + ' tin' : 'Đã hết trần hôm nay'}</button>`);
+}
+async function guiZaloLo(btn) {
+  busy(btn, true); btn.textContent = 'Đang gửi…';
+  try {
+    const r = (await callW('api_guiZalo', [{ ma: S.zaloMa }])).result, k = ketQuaZalo(r);
+    openSheet('Kết quả gửi Zalo', `<p><b>${esc(k.msg)}</b></p>${k.loi.length ? '<div class="sec">Chưa gửi</div><ul class="items">' + k.loi.map(x => `<li><span>${esc(x.ten)}</span><span class="muted">${esc(x.msg)}</span></li>`).join('') + '</ul>' : ''}<button class="btn block" onclick="closeSheet();rerender()">Đóng</button>`);
+  } catch (e) { busy(btn, false); toast(errMsg(e), true); }
 }
 
 function ketQua(gi, ci) { const e = S.due.groups[gi].customers[ci]; ketQuaSheet(e.kh, e.items, 'DA_THAY'); }
@@ -700,6 +737,7 @@ function viewCaiDat() {
   h += I.dealers.length ? I.dealers.map((d, i) => `<button class="list-item" onclick="formDaiLy(${i})"><b>${esc(d.ten)}</b> <span class="muted">${esc(d.ma)}</span><div class="muted">${esc(d.khuVuc || '')}${d.sdt ? ' · ' + phoneFmt(d.sdt) : ' · chưa có SĐT/Zalo'}${d.phuTrach ? ' · A12: ' + esc(d.phuTrach) : ''}</div></button>`).join('') : '<p class="muted">Chưa có đại lý. Thêm 2–3 đại lý thí điểm trước khi nhập khách.</p>';
   h += `<div class="between" style="margin-top:20px"><h3>Người dùng</h3><button class="btn sm" onclick="formUser()">+ Thêm</button></div>`;
   h += S.users.map((u, i) => `<button class="list-item" onclick="formUser(${i})"><div class="between"><div><b>${esc(u.ten || u.email)}</b><div class="muted">${esc(u.email)} · ${esc(u.role)}${u.email7h ? ' · nhận email 7h' : ''}</div></div>${u.active ? '' : '<span class="badge b-grey">Đã khóa</span>'}</div></button>`).join('');
+  h += zaloCaiDatHtml();
   h += `<div class="sec">Nhập khách hàng loạt</div><div class="card"><p class="small" style="margin-top:0">Dán danh sách vào tab <b>NhapKhach</b> của Google Sheet (mỗi khách một dòng), rồi bấm nút dưới. Cột “Hạng mục” nhận mã (RO1, MUOI…) hoặc tên nhóm thiết bị (Máy lọc RO, Lọc tổng, Cột làm mềm…), cách nhau dấu phẩy. Kết quả từng dòng ghi vào cột “Kết quả nhập”; dòng đã có kết quả sẽ không nhập lại.</p>
     <button class="btn primary" onclick="nhapKhach(this)">Xử lý tab NhapKhach</button></div>`;
   h += `<div class="sec">Chu kỳ nhắc mặc định</div><p class="note">Sửa trong tab <b>ChuKy</b> của Google Sheet. Thay đổi áp dụng cho khách thêm mới; khách cũ sửa riêng ở trang khách (Sửa lịch).</p>
@@ -707,6 +745,61 @@ function viewCaiDat() {
   h += `<div class="sec">Khác</div><div class="actions"><button class="btn" onclick="emailThu(this)">Gửi email tổng hợp thử</button>${I.sheetUrl ? `<a class="btn" href="${esc(I.sheetUrl)}" target="_blank" rel="noopener">Mở Google Sheet dữ liệu</a>` : ''}</div>
     <p class="note">Phiên bản ${esc(I.version)}.</p>`;
   main().innerHTML = h;
+}
+function zaloCaiDatHtml() {
+  const Z = S.init.zalo;
+  if (!Z) return '<div class="sec">Gửi tin Zalo</div><p class="note">Máy chủ chưa có phần Zalo (cần cập nhật Apps Script bản 1.7).</p>';
+  const st = [
+    Z.ketNoi ? 'Đã kết nối Zalo OA (App ' + esc(Z.appId) + ')' + (Z.lamMoi ? ' · cấp mã gần nhất ' + esc(Z.lamMoi) : '') : 'Chưa kết nối Zalo OA',
+    Z.coMau ? 'Mẫu tin: ' + esc(Z.templateId) : 'Chưa có ID mẫu tin đã được Zalo duyệt',
+    'Hôm nay đã gửi ' + Z.daGui + '/' + Z.tran + ' tin' + (Z.lanChay ? ' · tự động gần nhất: ' + esc(Z.lanChay) : '')
+  ];
+  if (Z.ketNoi && !Z.trigger) st.push('Chưa có lịch chạy mỗi giờ — bấm Lưu ở “Cài đặt gửi” một lần là tự cài.');
+  if (Z.loi) st.push('<span style="color:var(--red)">Lỗi: ' + esc(Z.loi) + '</span>');
+  return `<div class="sec">Gửi tin Zalo (ZBS theo SĐT)</div><div class="card">
+    <div class="between"><div><b>Tự động hằng ngày: ${Z.tuDong ? 'BẬT' : 'TẮT'}</b><div class="muted">${Z.tuDong ? 'Từ ' + Z.gio + 'h, gửi khách đến hạn chưa được báo' : 'Chỉ gửi khi bấm “Gửi Zalo”'}</div></div>
+    <button class="btn sm ${Z.tuDong ? '' : 'primary'}" onclick="batTatZalo(this,${!Z.tuDong})" ${Z.san || Z.tuDong ? '' : 'disabled'}>${Z.tuDong ? 'Tắt' : 'Bật'}</button></div>
+    <p class="small">${st.join('<br>')}</p>
+    <div class="actions"><button class="btn sm" onclick="formZalo()">Cài đặt gửi</button><button class="btn sm" onclick="formKhoaZalo()">${Z.ketNoi ? 'Kết nối lại' : 'Kết nối Zalo OA'}</button>${Z.san ? '<button class="btn sm" onclick="thuZalo(this)">Gửi thử</button>' : ''}</div></div>`;
+}
+function formZalo() {
+  const Z = S.init.zalo;
+  openSheet('Cài đặt gửi tin Zalo', `<div class="grid2"><div class="field"><label>Giờ tự gửi (7–20)</label><input type="number" id="zGio" min="7" max="20" value="${Z.gio}"></div>
+    <div class="field"><label>Tối đa tin/ngày</label><input type="number" id="zTran" min="0" max="500" value="${Z.tran}"></div></div>
+    <div class="field"><label>ID mẫu tin đã duyệt</label><input type="text" id="zMau" value="${esc(Z.templateId || '')}" autocomplete="off"></div>
+    <div class="grid2"><div class="field"><label>SĐT nhận gửi thử</label><input type="tel" id="zThu" value="${esc(Z.sdtThu || '')}"></div>
+    <div class="field"><label>SĐT A12 (khách chưa có kho)</label><input type="tel" id="zA12" value="${esc(Z.sdtA12 || '')}"></div></div>
+    <p class="note">Trần tin/ngày tính cả gửi tay lẫn tự động. Không gửi từ 21h đến 7h. Khách không muốn nhận: ghi “không nhắn Zalo” vào Ghi chú của khách.</p>
+    <button class="btn primary block" onclick="luuZalo(this)">Lưu</button>`);
+}
+async function luuZalo(btn) {
+  const d = { gio: $('#zGio').value, tran: $('#zTran').value, templateId: $('#zMau').value.trim(), sdtThu: $('#zThu').value, sdtA12: $('#zA12').value };
+  busy(btn, true);
+  try { await callW('api_luuZalo', [d]); toast('Đã lưu'); closeSheet(); viewCaiDat(); } catch (e) { busy(btn, false); toast(errMsg(e), true); }
+}
+function formKhoaZalo() {
+  const Z = S.init.zalo;
+  openSheet('Kết nối Zalo OA', `<p class="small" style="margin-top:0">Lấy ở developers.zalo.me: <b>App ID</b> và <b>Khóa bí mật</b> (trang Cài đặt của ứng dụng), <b>Refresh token</b> (Công cụ → API Explorer → OA Access Token). Khóa chỉ lưu trên máy chủ Google của A12, không hiện lại ở đây. Ô để trống = giữ nguyên.</p>
+    <div class="field"><label>App ID</label><input type="text" id="kApp" value="${esc(Z.appId || '')}" inputmode="numeric" autocomplete="off"></div>
+    <div class="field"><label>Khóa bí mật của ứng dụng</label><input type="password" id="kSec" autocomplete="new-password"></div>
+    <div class="field"><label>Refresh token</label><input type="password" id="kRf" autocomplete="new-password"></div>
+    <button class="btn primary block" onclick="luuKhoaZalo(this)">Lưu và kiểm tra kết nối</button>`);
+}
+async function luuKhoaZalo(btn) {
+  const d = { appId: $('#kApp').value.trim(), secret: $('#kSec').value.trim(), refresh: $('#kRf').value.trim() };
+  busy(btn, true);
+  try { const r = (await callW('api_luuZalo', [d])).result; closeSheet(); viewCaiDat(); toast(r.ketNoi || 'Đã lưu', r.ok === false); }
+  catch (e) { busy(btn, false); toast(errMsg(e), true); }
+}
+async function batTatZalo(btn, on) {
+  busy(btn, true);
+  try { await callW('api_luuZalo', [{ tuDong: on }]); toast(on ? 'Đã BẬT gửi Zalo tự động' : 'Đã TẮT gửi Zalo tự động'); viewCaiDat(); }
+  catch (e) { busy(btn, false); toast(errMsg(e), true); }
+}
+async function thuZalo(btn) {
+  busy(btn, true);
+  try { const r = (await callW('api_thuZalo', [])).result; busy(btn, false); toast(r.msg, !r.ok); }
+  catch (e) { busy(btn, false); toast(errMsg(e), true); }
 }
 function formDaiLy(i) {
   const d = i === undefined ? {} : S.init.dealers[i];
