@@ -44,6 +44,8 @@ h3{font-size:16px;margin:0}
 .stat b{display:block;font-size:22px;line-height:1.2}
 .stat span{font-size:12.5px;color:var(--muted)}
 .stat.hot{background:var(--accent)} .stat.hot b{color:var(--red)}
+button.stat{border:2px solid transparent;text-align:left;cursor:pointer;font:inherit;color:inherit;width:100%}
+button.stat.on{border-color:var(--red)}
 .card{background:var(--card);border-radius:var(--radius);padding:12px 14px;margin-bottom:12px}
 .card.accent{background:var(--accent)} .card.accent h3{color:var(--red)}
 .group-h{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:18px 0 8px}
@@ -116,7 +118,7 @@ a{color:var(--red)}
 </div>
 <div id="toast" class="toast"></div>
 <script>
-var API_URL = 'https://script.google.com/macros/s/AKfycbwx6q0D0QPiuaan0a3HZoL2N3uCUb_j5-yOVudxthYDkjlMorCRtdN2xcURKdS7YVU1/exec', WEB_VERSION = '1.8a';
+var API_URL = 'https://script.google.com/macros/s/AKfycbwx6q0D0QPiuaan0a3HZoL2N3uCUb_j5-yOVudxthYDkjlMorCRtdN2xcURKdS7YVU1/exec', WEB_VERSION = '1.8b';
 var TOKEN = (function () {
   var m = (location.hash + '&' + location.search).match(/[#?&]k=([A-Za-z0-9]{20,80})/), t = m ? m[1] : '';
   try { if (t) localStorage.setItem('a12k', t); else t = localStorage.getItem('a12k') || ''; } catch (e) {}
@@ -125,7 +127,7 @@ var TOKEN = (function () {
 })();
 </script>
 <script>
-const S = { token: TOKEN, init: null, tab: null, due: null, dueOpts: { dealer: 'ALL', sale: 'ALL', hideNotified: false }, ctvOpts: { q: '', tinh: '', an: true }, kh: null, khList: [], soHan: [], users: [], q: '', pending: 0 };
+const S = { token: TOKEN, init: null, tab: null, due: null, dueOpts: { dealer: 'ALL', sale: 'ALL', hideNotified: false, loai: '' }, ctvOpts: { q: '', tinh: '', an: true }, kh: null, khList: [], soHan: [], users: [], q: '', pending: 0 };
 const $ = s => document.querySelector(s);
 const main = () => $('#main');
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -149,7 +151,7 @@ function saveCache(d) { try { localStorage.setItem(CACHE_KEY(), JSON.stringify(d
 function loadCache() { try { return JSON.parse(localStorage.getItem(CACHE_KEY()) || 'null'); } catch (e) { return null; } }
 function thoat(msg) {
   try { Object.keys(localStorage).filter(k => k === 'a12k' || k.indexOf('a12c:') === 0).forEach(k => localStorage.removeItem(k)); } catch (e) {}
-  S.token = ''; S.init = null; S.kh = null; S.q = ''; S.dueOpts = { dealer: 'ALL', sale: 'ALL', hideNotified: false }; history.replaceState(null, '', location.pathname); closeSheet(); askLink(msg);
+  S.token = ''; S.init = null; S.kh = null; S.q = ''; S.dueOpts = { dealer: 'ALL', sale: 'ALL', hideNotified: false, loai: '' }; history.replaceState(null, '', location.pathname); closeSheet(); askLink(msg);
 }
 function askLink(msg) {
   $('#nav').innerHTML = ''; $('#who').innerHTML = ''; $('#btnRefresh').style.display = 'none';
@@ -234,7 +236,9 @@ function filterDue(due, o) {
     const cs = [];
     g.customers.forEach(e => {
       if (o.sale && o.sale !== 'ALL' && (e.kh.sale || '') !== o.sale) return;
-      const items = e.items.filter(it => { if (it.notified) counts.notified++; if (o.hideNotified && it.notified) return false; counts[it.state]++; return true; });
+      // Đếm theo bộ lọc đại lý/sale/ẩn đã báo; ô thống kê đang chọn (o.loai) chỉ lọc phần hiển thị, không đổi số đếm.
+      const items = e.items.filter(it => { if (it.notified) counts.notified++; if (o.hideNotified && it.notified) return false; counts[it.state]++; return true; })
+        .filter(it => !o.loai || (o.loai === 'notified' ? it.notified : it.state === o.loai));
       if (items.length) cs.push(Object.assign({}, e, { items }));
     });
     if (cs.length) groups.push(Object.assign({}, g, { customers: cs }));
@@ -319,10 +323,11 @@ function viewDue() {
   S.due = r; const c = r.counts;
   const dlOpts = ['<option value="ALL">Tất cả đại lý</option>'].concat(S.init.dealers.map(d => `<option value="${esc(d.ma)}">${esc(d.ten)}</option>`), ['<option value="">Chưa gán đại lý</option>']).join('');
   let h = `<h2>Đến hạn bảo trì</h2>
-  <div class="stats"><div class="stat hot"><b>${c.overdue}</b><span>Quá hạn</span></div><div class="stat"><b>${c.soon}</b><span>Sắp đến hạn</span></div><div class="stat"><b>${c.notified}</b><span>Đã báo</span></div></div>
+  <div class="stats">${[['overdue', c.overdue, 'Quá hạn', ' hot'], ['soon', c.soon, 'Sắp đến hạn', ''], ['notified', c.notified, 'Đã báo', '']].map(x => `<button type="button" class="stat${x[3]}${S.dueOpts.loai === x[0] ? ' on' : ''}" onclick="chonLoaiDue('${x[0]}')" aria-pressed="${S.dueOpts.loai === x[0]}"><b>${x[1]}</b><span>${x[2]}</span></button>`).join('')}</div>
   <div class="row wrap" style="margin-bottom:6px"><select id="fDealer" style="flex:1;min-width:180px" onchange="S.dueOpts.dealer=this.value;viewDue()">${dlOpts}</select>
  ${saleFilterHtml()}
-  <label class="row small" style="gap:6px"><input type="checkbox" id="fHide" ${S.dueOpts.hideNotified ? 'checked' : ''} onchange="S.dueOpts.hideNotified=this.checked;viewDue()" style="width:18px;height:18px;accent-color:var(--red)">Ẩn mục đã báo</label></div>`;
+  <label class="row small" style="gap:6px"><input type="checkbox" id="fHide" ${S.dueOpts.hideNotified ? 'checked' : ''} onchange="S.dueOpts.hideNotified=this.checked;if(this.checked&&S.dueOpts.loai==='notified')S.dueOpts.loai='';viewDue()" style="width:18px;height:18px;accent-color:var(--red)">Ẩn mục đã báo</label></div>`;
+  if (S.dueOpts.loai) { const nKh = r.groups.reduce((a, g) => a + g.customers.length, 0); h += `<p class="note" style="color:var(--ink)">Đang xem: <b>${{ overdue: 'Quá hạn', soon: 'Sắp đến hạn', notified: 'Đã báo' }[S.dueOpts.loai]}</b> · ${nKh} khách · <a href="#" onclick="chonLoaiDue('');return false">Xem tất cả</a></p>`; }
   const notes = [];
   if (c.snoozed) notes.push(c.snoozed + ' hạng mục đang hẹn lại');
   if (c.control) notes.push(c.control + ' hạng mục của nhóm Đối chứng không hiện (để đo thí điểm)');
@@ -343,6 +348,13 @@ function viewDue() {
   main().innerHTML = h;
   $('#fDealer').value = S.dueOpts.dealer;
   if ($('#fSale')) $('#fSale').value = S.dueOpts.sale;
+}
+
+// Bấm ô thống kê: lọc danh sách theo loại; bấm lại ô đang chọn để bỏ lọc.
+function chonLoaiDue(loai) {
+  S.dueOpts.loai = S.dueOpts.loai === loai ? '' : loai;
+  if (S.dueOpts.loai === 'notified') S.dueOpts.hideNotified = false; // xem "Đã báo" thì không được ẩn mục đã báo
+  viewDue(); window.scrollTo(0, 0);
 }
 
 function itemsLines(items) { return items.map(i => '- ' + i.ten + ': ' + (i.days < 0 ? 'quá hạn từ ' + dmy(i.due) : 'hạn ' + dmy(i.due))).join('\n'); }
