@@ -116,7 +116,7 @@ a{color:var(--red)}
 </div>
 <div id="toast" class="toast"></div>
 <script>
-var API_URL = 'https://script.google.com/macros/s/AKfycbwx6q0D0QPiuaan0a3HZoL2N3uCUb_j5-yOVudxthYDkjlMorCRtdN2xcURKdS7YVU1/exec', WEB_VERSION = '1.8';
+var API_URL = 'https://script.google.com/macros/s/AKfycbwx6q0D0QPiuaan0a3HZoL2N3uCUb_j5-yOVudxthYDkjlMorCRtdN2xcURKdS7YVU1/exec', WEB_VERSION = '1.8a';
 var TOKEN = (function () {
   var m = (location.hash + '&' + location.search).match(/[#?&]k=([A-Za-z0-9]{20,80})/), t = m ? m[1] : '';
   try { if (t) localStorage.setItem('a12k', t); else t = localStorage.getItem('a12k') || ''; } catch (e) {}
@@ -753,7 +753,7 @@ function viewCTV() {
 function veDsCTV(daLoc) {
   if (!daLoc) return viewCTVGiuO();
   const box = $('#ctvList'), loc = S.ctvLoc;
-  box.innerHTML = loc.length ? `<p class="muted">${loc.length} CTV</p>` + loc.slice(0, 80).map(c => ctvCard(c, '')).join('') + (loc.length > 80 ? '<p class="note">Hiện 80 CTV điểm cao nhất — lọc theo tỉnh để xem thêm.</p>' : '') : '<div class="empty">Không có CTV phù hợp.</div>';
+  box.innerHTML = loc.length ? `<p class="muted">${loc.length} CTV${loc.length < (S.init.ctv || []).length ? ' / tổng ' + (S.init.ctv || []).length + ' — đang ẩn ' + ((S.init.ctv || []).length - loc.length) + ' theo bộ lọc' : ''}</p>` + loc.map(c => ctvCard(c, '')).join('') : '<div class="empty">Không có CTV phù hợp.</div>';
 }
 function viewCTVGiuO() { const el = $('#cq'), pos = el ? el.selectionStart : null; viewCTV(); const e2 = $('#cq'); if (e2 && pos !== null) { e2.focus(); e2.setSelectionRange(pos, pos); } }
 const THANG_DIEM = 'Thang điểm ban đầu (bảng kê CTV 12/2025): Lọc nước +2 · Điện nước/điện lạnh +1 · Có thông tin chi tiết +1 · Khách thợ/đại lý +1 · Đã vào nhóm +1 · Thiện chí/đã tham gia đào tạo +2 · Có kinh nghiệm +2 · Có cửa hàng +1 · Không rõ −1 · Không quan tâm nữa −10.';
