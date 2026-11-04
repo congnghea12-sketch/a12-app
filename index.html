@@ -118,7 +118,7 @@ a{color:var(--red)}
 </div>
 <div id="toast" class="toast"></div>
 <script>
-var API_URL = 'https://script.google.com/macros/s/AKfycbwx6q0D0QPiuaan0a3HZoL2N3uCUb_j5-yOVudxthYDkjlMorCRtdN2xcURKdS7YVU1/exec', WEB_VERSION = '1.8d';
+var API_URL = 'https://script.google.com/macros/s/AKfycbwx6q0D0QPiuaan0a3HZoL2N3uCUb_j5-yOVudxthYDkjlMorCRtdN2xcURKdS7YVU1/exec', WEB_VERSION = '1.8e';
 var TOKEN = (function () {
   var m = (location.hash + '&' + location.search).match(/[#?&]k=([A-Za-z0-9]{20,80})/), t = m ? m[1] : '';
   try { if (t) localStorage.setItem('a12k', t); else t = localStorage.getItem('a12k') || ''; } catch (e) {}
@@ -541,7 +541,8 @@ function renderKhach() {
   const r = S.kh, k = r.kh, dl = dealerOf(k.maDL);
   let h = `<button class="btn ghost back" onclick="viewKhach()">‹ Danh sách khách</button>
     <div class="card"><div class="between"><div><h3>${esc(k.ten)}</h3><div class="muted">${esc(k.ma)}</div></div><button class="btn sm" onclick="formKhach(S.kh.kh)">Sửa</button></div>
-    <div class="small" style="margin-top:8px">${k.sdt ? `<a href="tel:${esc(k.sdt)}">${phoneFmt(k.sdt)}</a> · <a href="https://zalo.me/${esc(k.sdt)}" target="_blank" rel="noopener">Zalo</a>` : 'Chưa có SĐT'}<br>${esc(k.diaChi || '')}${k.khuVuc ? ' · ' + esc(k.khuVuc) : ''}<br>Đại lý: ${dl ? esc(dl.ten) : 'chưa gán'} · Sale: ${esc(saleTen(k.sale))}${k.ghiChu ? '<br>Ghi chú: ' + esc(k.ghiChu) : ''}</div></div>
+    <div class="small" style="margin-top:8px">${k.sdt ? `<a href="tel:${esc(k.sdt)}">${phoneFmt(k.sdt)}</a> · <a href="https://zalo.me/${esc(k.sdt)}" target="_blank" rel="noopener">Zalo</a>` : 'Chưa có SĐT'}<br>${esc(k.diaChi || '')}${k.khuVuc ? ' · ' + esc(k.khuVuc) : ''}<br>Đại lý: ${dl ? esc(dl.ten) : 'chưa gán'} · Sale: ${k.sale ? esc(saleTen(k.sale)) : '<b style="color:var(--red)">chưa gán sale</b>'}${k.ghiChu ? '<br>Ghi chú: ' + esc(k.ghiChu) : ''}</div>
+    ${S.init.canGiaoSale ? `<div class="actions"><button class="btn sm${k.sale ? '' : ' primary'}" onclick="formGanSale()">${k.sale ? 'Đổi sale phụ trách' : 'Gán sale phụ trách'}</button></div>` : ''}</div>
     <div class="between" style="margin-top:16px"><h3>Lịch bảo trì</h3><button class="btn sm" onclick="themHangMuc()">+ Thêm hạng mục</button></div>`;
   if (!r.items.length) h += '<div class="empty">Chưa có hạng mục nhắc nào.</div>';
   r.items.forEach((it, i) => {
@@ -664,6 +665,23 @@ async function saveThemHM(btn) {
 }
 
 /* ---------------- SALE PHỤ TRÁCH (giao diện 1.8) ---------------- */
+// 1.8e: CSKH/Quản trị gán hoặc đổi sale ngay trong trang khách (vd khách CSKH chăm sóc đã mua hàng → giao sale theo dõi tiếp).
+function formGanSale() {
+  const k = S.kh.kh;
+  openSheet(k.sale ? 'Đổi sale phụ trách' : 'Gán sale phụ trách', `<p class="small"><b>${esc(k.ten)}</b> · ${esc(k.ma)}<br>Đang phụ trách: ${esc(saleTen(k.sale))}</p>
+    <div class="field"><label>Giao cho sale</label><select id="gsSale">${saleOptions(k.sale)}</select></div>
+    <p class="note">Sau khi gán, khách và lịch nhắc của khách hiện trong danh sách của sale này. Sale khác không thấy khách. Nhật ký khách ghi lại người gán và sale cũ → sale mới.</p>
+    <button class="btn primary block" onclick="luuGanSale(this)">Lưu</button>`);
+}
+async function luuGanSale(btn) {
+  const k = S.kh.kh, sale = $('#gsSale').value;
+  if (sale === (k.sale || '')) return closeSheet();
+  busy(btn, true);
+  try {
+    await callW('api_luuKhach', [Object.assign({}, k, { sale: sale, hangMuc: [] })], { chiTiet: true });
+    toast(sale ? 'Đã giao khách cho ' + saleTen(sale) : 'Đã bỏ gán sale'); showKhach();
+  } catch (e) { busy(btn, false); toast(errMsg(e), true); }
+}
 function saleTen(email) {
   if (!email) return 'chưa gán sale';
   const x = (S.init.sales || []).find(s => s.email === email) || (S.init.users || []).find(u => (u.email || '').toLowerCase() === email);
