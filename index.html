@@ -118,7 +118,7 @@ a{color:var(--red)}
 </div>
 <div id="toast" class="toast"></div>
 <script>
-var API_URL = 'https://script.google.com/macros/s/AKfycbwx6q0D0QPiuaan0a3HZoL2N3uCUb_j5-yOVudxthYDkjlMorCRtdN2xcURKdS7YVU1/exec', WEB_VERSION = '1.8e';
+var API_URL = 'https://script.google.com/macros/s/AKfycbwx6q0D0QPiuaan0a3HZoL2N3uCUb_j5-yOVudxthYDkjlMorCRtdN2xcURKdS7YVU1/exec', WEB_VERSION = '1.8f';
 var TOKEN = (function () {
   var m = (location.hash + '&' + location.search).match(/[#?&]k=([A-Za-z0-9]{20,80})/), t = m ? m[1] : '';
   try { if (t) localStorage.setItem('a12k', t); else t = localStorage.getItem('a12k') || ''; } catch (e) {}
@@ -373,6 +373,7 @@ const viHoa = w => w ? hoa1(lo(w)) : '';
 /** "Chị Nguyễn Thị Thúy - Mỗ Lao" → {xh:'chị', goi:'Thúy', toi:'em'}. Không rõ giới → xh 'anh/chị'.
  *  Muốn chắc chắn: sửa tên khách có chữ "Anh"/"Chị"/"Chú"/"Cô"/"Bác" ở đầu. */
 function xungHo(tenRaw) {
+  if (/(^|\s)(công ty|cty|tnhh|cổ phần|hộ kinh doanh|hkd|trường|bệnh viện|ubnd|hợp tác xã|htx|chi nhánh|trung tâm|doanh nghiệp|tập đoàn|khách sạn|nhà hàng)(\s|$)/i.test(String(tenRaw || ''))) return { xh: 'anh/chị', goi: '', toi: 'em' }; // khách tổ chức: không đoán tên người
   let s = String(tenRaw || '').replace(/\(.*?\)/g, ' ').split(/\s*[-–]\s*/)[0].replace(/\b(mr|mrs|ms)\.?\s+/ig, '').replace(/^(đl|đại lý)\s+/i, '').replace(/\s+/g, ' ').trim();
   if (/^khách( lẻ)?$/i.test(s)) s = '';
   let w = s ? s.split(' ') : [], lw = w.map(lo);
@@ -401,20 +402,21 @@ function tenNguoiGui() {
 function khoTen(dl) { return dl ? String(dl.ten).replace(/^tổng\s+kho\s+/i, 'kho ') : ''; }
 function gonTin(t) { return String(t).replace(/^[ \t]*\u0001[ \t]*(\n|$)/gm, '').replace(/\u0001/g, '').replace(/[ \t]{2,}/g, ' ').replace(/ ([,.!?])/g, '$1').replace(/[ \t]+\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim(); }
 const MAU_KHACH_16 = [
-  'Dạ {toi} chào {xung_ho} {ten_goi} ạ! {Toi} là {nguoi_gui} bên A12{kho}.',
-  '{Toi} vẫn theo dõi lịch bảo trì riêng cho hệ lọc nước nhà mình, và thấy đã đến kỳ chăm sóc:',
+  'Dạ {toi} chào {xung_ho} {ten_goi} ạ! {Toi} là {nguoi_gui} bên Công ty Lọc nước A12{kho}',
+  '{Toi} vẫn theo dõi lịch bảo trì riêng cho hệ lọc nước nhà mình và thấy đã đến kỳ chăm sóc:',
   '{hang_muc}',
   'Thay đúng kỳ giúp hệ lọc chạy ổn định hơn. {Xung_ho} cần đặt lõi, vật tư hoặc cần tư vấn cách thay, cứ nhắn lại cho {toi}, {toi} sẽ sắp xếp phương án phù hợp cho nhà mình ạ.',
   '{lien_he}',
-  'Nếu nhà mình đã thay rồi, {xung_ho} báo {toi} một tiếng để {toi} cập nhật lịch, lần sau nhắc cho đúng hẹn ạ. {Toi} cảm ơn {xung_ho} nhiều!'
+  'Nếu nhà mình đã thay rồi, {xung_ho} nhắn lại giúp {toi} để {toi} cập nhật lịch, lần sau nhắc cho đúng hẹn ạ. {Toi} cảm ơn {xung_ho} nhiều!'
 ].join('\n');
+const HOTLINE_A12 = '035 900 8338';
 /** Mẫu tin trong Sheet (tab MauTin) chưa có biến mới → dùng mẫu 1.6 dựng sẵn; có biến mới → dùng mẫu trong Sheet. */
 const mauKhach = () => /\{(toi|xung_ho|ten_goi|nguoi_gui|lien_he|kho)\}/.test(S.init.mauTin.KHACH || '') ? S.init.mauTin.KHACH : MAU_KHACH_16;
 function textKhach(kh, items) {
   const dl = dealerOf(kh.maDL), x = xungHo(kh.ten), kt = khoTen(dl), sdt = dl && dl.sdt ? phoneFmt(dl.sdt) : '';
   return gonTin(fillT(mauKhach(), {
     xung_ho: x.xh, Xung_ho: hoa1(x.xh), ten_goi: x.goi, toi: x.toi, Toi: hoa1(x.toi), nguoi_gui: tenNguoiGui(),
-    kho: kt ? ' (' + kt + ')' : '', lien_he: sdt ? 'Cần gấp, ' + x.xh + ' gọi ' + kt + ': ' + sdt + ' ạ.' : '\u0001',
+    kho: dl ? ' (' + dl.ten + ')' : '', lien_he: 'Khi cần hỗ trợ, ' + x.xh + ' vui lòng liên hệ theo số hotline A12: ' + HOTLINE_A12 + ' để bên ' + x.toi + ' hỗ trợ ạ.',
     ten_khach: kh.ten, hang_muc: itemsKhach(items), ngay_den_han: dmy(items[0].due), dai_ly: dl ? 'A12 (' + kt + ')' : 'A12', sdt_dai_ly: sdt
   }));
 }
@@ -440,7 +442,7 @@ function sendDealer(gi) {
   const g = S.due.groups[gi];
   const list = g.customers.map((e, i) => (i + 1) + '. ' + e.kh.ten + (e.kh.sdt ? ' – ' + phoneFmt(e.kh.sdt) : '') + (e.kh.diaChi ? ' – ' + e.kh.diaChi : '') + '\n   ' + e.items.map(it => it.ten + ' (' + (it.days < 0 ? 'quá hạn ' + (-it.days) + ' ngày' : 'hạn ' + dm(it.due)) + ')').join('; ')).join('\n');
   const kt = g.dealer.ma ? khoTen(g.dealer) : '';
-  const sample = gonTin(fillT(mauKhach(), { xung_ho: '[anh/chị]', Xung_ho: '[Anh/Chị]', ten_goi: '[tên]', toi: 'em', Toi: 'Em', nguoi_gui: '[tên người gửi]', kho: kt ? ' (' + kt + ')' : '', lien_he: '',
+  const sample = gonTin(fillT(mauKhach(), { xung_ho: '[anh/chị]', Xung_ho: '[Anh/Chị]', ten_goi: '[tên]', toi: 'em', Toi: 'Em', nguoi_gui: '[tên người gửi]', kho: g.dealer.ma ? ' (' + g.dealer.ten + ')' : '', lien_he: 'Khi cần hỗ trợ, [anh/chị] vui lòng liên hệ theo số hotline A12: ' + HOTLINE_A12 + ' để bên em hỗ trợ ạ.',
     ten_khach: '[tên khách]', hang_muc: '- [hạng mục]: đã đến kỳ thay', ngay_den_han: '[ngày]', dai_ly: kt ? 'A12 (' + kt + ')' : 'A12', sdt_dai_ly: g.dealer.sdt ? phoneFmt(g.dealer.sdt) : '' }));
   const text = fillT(S.init.mauTin.DAI_LY, { dai_ly: g.dealer.ten, so_khach: g.customers.length, danh_sach: list, tin_mau: sample });
   const ids = []; g.customers.forEach(e => e.items.forEach(i => ids.push(i.id)));
