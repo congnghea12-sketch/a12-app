@@ -118,7 +118,7 @@ a{color:var(--red)}
 </div>
 <div id="toast" class="toast"></div>
 <script>
-var API_URL = 'https://script.google.com/macros/s/AKfycbwx6q0D0QPiuaan0a3HZoL2N3uCUb_j5-yOVudxthYDkjlMorCRtdN2xcURKdS7YVU1/exec', WEB_VERSION = '1.8c';
+var API_URL = 'https://script.google.com/macros/s/AKfycbwx6q0D0QPiuaan0a3HZoL2N3uCUb_j5-yOVudxthYDkjlMorCRtdN2xcURKdS7YVU1/exec', WEB_VERSION = '1.8d';
 var TOKEN = (function () {
   var m = (location.hash + '&' + location.search).match(/[#?&]k=([A-Za-z0-9]{20,80})/), t = m ? m[1] : '';
   try { if (t) localStorage.setItem('a12k', t); else t = localStorage.getItem('a12k') || ''; } catch (e) {}
@@ -231,11 +231,12 @@ async function lamMoi(quiet) {
 // Lọc danh sách đến hạn tại máy (theo đại lý, ẩn mục đã báo) — không gọi máy chủ.
 function filterDue(due, o) {
   const counts = { overdue: 0, soon: 0, notified: 0, snoozed: due.counts.snoozed, control: due.counts.control }, groups = [];
+  const sf = o.sale == null || o.sale === 'ALL' ? 'ALL' : String(o.sale).toLowerCase();
   due.groups.forEach(g => {
     if (o.dealer !== 'ALL' && (g.dealer.ma || '') !== o.dealer) return;
     const cs = [];
     g.customers.forEach(e => {
-      if (o.sale && o.sale !== 'ALL' && (e.kh.sale || '') !== o.sale) return;
+      if (sf !== 'ALL' && String(e.kh.sale || '').toLowerCase() !== sf) return; // sf '' = Chưa gán sale
       // Đếm theo bộ lọc đại lý/sale/ẩn đã báo; ô thống kê đang chọn (o.loai) chỉ lọc phần hiển thị, không đổi số đếm.
       const items = e.items.filter(it => { if (it.notified) counts.notified++; if (o.hideNotified && it.notified) return false; counts[it.state]++; return true; })
         .filter(it => !o.loai || (o.loai === 'notified' ? it.notified : it.state === o.loai));
